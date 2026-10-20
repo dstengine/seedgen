@@ -1,16 +1,20 @@
-// Builds dist/: one bundled script, the page, its icons, a manifest and a
-// service worker. Every URL is relative, so the same dist serves from a
-// domain root and from sol2go.lol/seedgen/ behind a rewrite.
+// Builds dist/: one bundled script, the page, its icons, a manifest, a
+// service worker, robots.txt and the sitemap. Asset URLs are relative, so
+// the same dist serves from any path; canonical URLs name seedgen.uk.
 import { build } from "esbuild";
 import sharp from "sharp";
 import { createHash } from "node:crypto";
-import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 
 const src = (f) => new URL(`./src/${f}`, import.meta.url);
 const dist = (f = "") => new URL(`./dist/${f}`, import.meta.url);
 
+const SITE = "https://seedgen.uk/";
+
 rmSync(dist(), { recursive: true, force: true });
 mkdirSync(dist());
+cpSync(new URL("./public/", import.meta.url), dist(), { recursive: true });
 
 await build({
   entryPoints: ["src/app.ts"],
@@ -72,6 +76,28 @@ const version = hash.digest("hex").slice(0, 10);
 writeFileSync(dist("index.html"), readFileSync(src("index.html"), "utf8").replaceAll("__VERSION__", version));
 const files = ["./", `app.js?v=${version}`, `style.css?v=${version}`, "manifest.webmanifest", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png", "icon-maskable.png"];
 writeFileSync(dist("sw.js"), readFileSync(src("sw.js"), "utf8").replace("__VERSION__", `seedgen-${version}`).replace("__FILES__", JSON.stringify(files)));
+
+// The page is dated by the last commit that changed what it shows (src/),
+// not by the build: a date that is always "now" is worse than none. Vercel
+// gets the upload without .git, so the date is kept in src/updated.txt,
+// which every local build refreshes from git and the deploy carries along.
+const stampFile = src("updated.txt");
+let updated;
+try {
+  updated = execFileSync("git", ["log", "-1", "--format=%cI", "--", "src/", ":!src/updated.txt"], { encoding: "utf8" }).trim();
+} catch {}
+if (updated) writeFileSync(stampFile, updated + "\n");
+else if (existsSync(stampFile)) updated = readFileSync(stampFile, "utf8").trim();
+writeFileSync(dist("robots.txt"), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}sitemap.xml\n`);
+writeFileSync(dist("sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${SITE}</loc>${updated ? `\n    <lastmod>${updated}</lastmod>` : ""}
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
+`);
 
 const kb = (f) => (readFileSync(dist(f)).length / 1024).toFixed(1);
 console.log(`dist/ built, version ${version}; app.js ${kb("app.js")} KB, style.css ${kb("style.css")} KB`);

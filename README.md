@@ -5,9 +5,13 @@ Solana, Ethereum, Bitcoin, Tron and TON addresses. Favourites are kept in
 `localStorage`, deleted with two taps. Ships as a PWA and as a Telegram
 Mini App. Spec: `~/mind/mobile/sites/seedgen.md`.
 
-To start with it is served at `sol2go.lol/seedgen/` through a rewrite in
-sol2go's `vercel.json`; every URL in `dist/` is relative, so the same build
-serves from a domain root as well.
+Lives at https://seedgen.uk/ (Vercel project `seedgen`; DNS at GoDaddy,
+`www` 308s to the apex). It started at `sol2go.lol/seedgen/`, which now
+301s here from sol2go's `vercel.json`.
+
+The page is dated by the last commit that changed `src/`; `npm run build`
+writes that date to `src/updated.txt`, which the deploy carries to Vercel
+(no `.git` there) for the sitemap's `lastmod`. Commit it with the change.
 
 ## The phrase
 
