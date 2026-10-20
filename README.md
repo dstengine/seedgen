@@ -9,9 +9,13 @@ Lives at https://seedgen.uk/ (Vercel project `seedgen`; DNS at GoDaddy,
 `www` 308s to the apex). It started at `sol2go.lol/seedgen/`, which now
 301s here from sol2go's `vercel.json`.
 
+Every push to `main` deploys to production (the Vercel project is linked to
+this repo); other branches get preview deployments.
+
 The page is dated by the last commit that changed `src/`; `npm run build`
-writes that date to `src/updated.txt`, which the deploy carries to Vercel
-(no `.git` there) for the sitemap's `lastmod`. Commit it with the change.
+writes that date to `src/updated.txt`, which Vercel's build falls back on
+(it has no git history to read) for the sitemap's `lastmod`. Build locally
+and commit it with the change.
 
 ## The phrase
 
