@@ -1,6 +1,6 @@
 # seedgen
 
-A seed phrase generator: one tap (or a swipe) makes a 24-word phrase and its
+A seed phrase generator: one tap (or a swipe) makes a 12- or 24-word phrase and its
 Solana, Ethereum, Bitcoin, Tron and TON addresses. Favourites are kept in
 `localStorage`, deleted with two taps. Ships as a PWA and as a Telegram
 Mini App. Spec: `~/mind/mobile/sites/seedgen.md`.
@@ -11,8 +11,10 @@ serves from a domain root as well.
 
 ## The phrase
 
-24 BIP39 words, drawn until the phrase is also a valid TON mnemonic (one in
-~256 is), so the same words import everywhere:
+12 or 24 words, the reader's choice (remembered in `localStorage`).
+
+24 BIP39 words are drawn until the phrase is also a valid TON mnemonic (one
+in ~256 is), so the same words import everywhere:
 
 | Chain | Derivation | Wallets |
 |---|---|---|
@@ -20,14 +22,17 @@ serves from a domain root as well.
 | Ethereum | `m/44'/60'/0'/0/0` | MetaMask, Rabby |
 | Bitcoin | `m/84'/0'/0'/0/0`, native SegWit | any BIP84 wallet |
 | Tron | `m/44'/195'/0'/0/0` | TronLink, Trust Wallet |
-| TON | TON mnemonic → wallet W5 (v5r1), non-bounceable `UQ…` | Tonkeeper, MyTonWallet |
+| TON, 24 words | TON mnemonic → wallet W5 (v5r1), non-bounceable `UQ…` | Tonkeeper, MyTonWallet |
+| TON, 12 words | `m/44'/607'/0'` (SLIP-10 ed25519) → wallet v4R2 | Trust Wallet |
 
-Trust Wallet and other multi-chain wallets read the phrase as BIP39 for TON
-too (`m/44'/607'/0'`) and show a different TON address; Tonkeeper reads it as
-a TON mnemonic and shows this one.
+A TON mnemonic is always 24 words, so a 12-word phrase is BIP39 only, and
+its TON address is the one Trust Wallet derives (wallet-core `tw_ton`:
+that path, v4R2). Tonkeeper will not import it. The other way round, Trust
+Wallet reads a 24-word phrase as BIP39 for TON too and shows a different TON
+address from Tonkeeper's; the card names the wallet on the TON row.
 
 The TON address is computed in `src/wallet.ts` by hashing the wallet's
-StateInit directly, rather than through `@ton/ton`, which would add 270 KB
+StateInit directly (W5 and v4R2), rather than through `@ton/ton`, which would add 270 KB
 for one hash. `@ton/ton` and `@ton/crypto` stay as dev dependencies so the
 tests can hold the result to them.
 
@@ -45,7 +50,7 @@ tests can hold the result to them.
 
 ```
 npm run build   # dist/
-npm test        # known-answer vectors for every chain, TON against @ton/ton
+npm test        # known-answer vectors for every chain; TON against @ton/ton and wallet-core
 npm run serve   # dist/ on :4173
-npm run e2e     # Chromium at 320px, light and dark: generate, swipe, favourites, offline
+npm run e2e     # Chromium at 320px, light and dark: generate, 12/24, swipe, favourites, offline
 ```

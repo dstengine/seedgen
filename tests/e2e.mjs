@@ -68,6 +68,19 @@ for (const scheme of ["light", "dark"]) {
   assert.equal(await page.textContent(".fav-del"), "Delete");
   assert.equal((await page.$$(".fav")).length, 1);
 
+  // 12 words: one tap switches, the choice survives a reload, and TON
+  // says where those words open.
+  await page.click('.tab[data-view="gen"]');
+  await page.click('[data-words-count="12"]');
+  await page.waitForFunction(() => document.querySelectorAll("[data-words] li").length === 12);
+  assert.match(await page.textContent("[data-addresses]"), /TON \(Gram\) · Trust Wallet/);
+  await page.screenshot({ path: `${shots}/gen12-320-${scheme}.png` });
+  await page.reload();
+  await page.waitForFunction(() => document.querySelectorAll("[data-words] li").length === 12);
+  await page.click('[data-words-count="24"]');
+  await page.waitForFunction(() => document.querySelectorAll("[data-words] li").length === 24);
+  assert.match(await page.textContent("[data-addresses]"), /TON \(Gram\) · Tonkeeper/);
+
   // Offline after the first visit.
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.reload();
@@ -79,7 +92,7 @@ for (const scheme of ["light", "dark"]) {
   assert.deepEqual(errors, [], "console errors");
   assert.deepEqual(foreign, [], "requests outside the page's own files");
   assert.notEqual(first, second);
-  console.log(`ok  ${scheme}: generate, swipe back, favourite, two-tap delete, offline, no outside requests`);
+  console.log(`ok  ${scheme}: generate, 12/24, swipe back, favourite, two-tap delete, offline, no outside requests`);
   await ctx.close();
 }
 await browser.close();

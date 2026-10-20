@@ -1,4 +1,4 @@
-import { CHAINS, newWallet, type Wallet } from "./wallet";
+import { CHAINS, TON_SCHEME, newWallet, wordCount, type Wallet, type WordCount } from "./wallet";
 
 const $ = <T extends Element = HTMLElement>(sel: string) => document.querySelector(sel) as T;
 
@@ -27,6 +27,13 @@ function saveFavs(list: Wallet[]): boolean {
 }
 
 let favs = loadFavs();
+
+// The length the reader picked last, kept between visits.
+const WORDS = "seedgen.words";
+let words: WordCount = 24;
+try {
+  if (localStorage.getItem(WORDS) === "12") words = 12;
+} catch {}
 const isFav = (w: Wallet) => favs.some((f) => f.id === w.id);
 
 // ---------------------------------------------------------------- telegram
@@ -162,7 +169,9 @@ function render(w: Wallet) {
       const btn = el("button", "addr");
       btn.type = "button";
       btn.title = `Copy ${c.name} address`;
-      btn.append(el("span", `chip chip-${c.id.toLowerCase()}`, c.id), el("span", "addr-name", c.name), el("code", "addr-value", w.addresses[c.id]));
+      // TON opens in a different wallet depending on the phrase's length.
+      const name = c.id === "TON" ? `${c.name} · ${TON_SCHEME[wordCount(w.phrase)].note.split(",")[0]}` : c.name;
+      btn.append(el("span", `chip chip-${c.id.toLowerCase()}`, c.id), el("span", "addr-name", name), el("code", "addr-value", w.addresses[c.id]));
       btn.addEventListener("click", () => copy(w.addresses[c.id], `${c.name} address`));
       li.append(btn);
       return li;
@@ -189,7 +198,7 @@ async function generate() {
   btn.disabled = true;
   btn.textContent = "Generating…";
   try {
-    const w = await newWallet();
+    const w = await newWallet(words);
     history.splice(at + 1);
     history.push(w);
     at = history.length - 1;
@@ -203,6 +212,16 @@ async function generate() {
     btn.disabled = false;
     btn.textContent = "Generate";
   }
+}
+
+function setWords(n: WordCount) {
+  document.querySelectorAll<HTMLElement>("[data-words-count]").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.wordsCount) === n)));
+  if (n === words) return;
+  words = n;
+  try {
+    localStorage.setItem(WORDS, String(n));
+  } catch {}
+  generate();
 }
 
 function back() {
@@ -320,13 +339,19 @@ function show(view: "gen" | "fav") {
 // ---------------------------------------------------------------- start
 
 function start() {
+  const row = (...cells: string[]) => {
+    const tr = el("tr");
+    tr.append(...cells.map((c) => el("td", "", c)));
+    return tr;
+  };
   $("[data-paths]").replaceChildren(
-    ...CHAINS.map((c) => {
-      const tr = el("tr");
-      tr.append(el("td", "", c.name), el("td", "", c.path), el("td", "", c.note));
-      return tr;
-    }),
+    ...CHAINS.filter((c) => c.id !== "TON").map((c) => row(c.name, c.path, c.note)),
+    ...([24, 12] as const).map((n) => row(`TON, ${n} words`, TON_SCHEME[n].path, TON_SCHEME[n].note)),
   );
+  document.querySelectorAll<HTMLElement>("[data-words-count]").forEach((b) =>
+    b.addEventListener("click", () => setWords(Number(b.dataset.wordsCount) as WordCount)),
+  );
+  document.querySelectorAll<HTMLElement>("[data-words-count]").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.wordsCount) === words)));
 
   $("[data-generate]").addEventListener("click", generate);
   $("[data-star]").addEventListener("click", toggleFav);

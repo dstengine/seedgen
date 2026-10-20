@@ -10,11 +10,11 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://telegram.org; style-src 'self'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <title>Seed phrase generator — Solana, Bitcoin, Ethereum, Tron, TON</title>
-<meta name="description" content="Seed phrase generator: one tap makes a 24-word phrase and its Solana, Ethereum, Bitcoin, Tron and TON wallet addresses, offline in your browser.">
+<meta name="description" content="Seed phrase generator: one tap makes a 12- or 24-word phrase and its Solana, Ethereum, Bitcoin, Tron and TON wallet addresses, offline in your browser.">
 <link rel="canonical" href="https://sol2go.lol/seedgen/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Seed phrase generator — Solana, Bitcoin, Ethereum, Tron, TON">
-<meta property="og:description" content="One tap: a 24-word seed phrase and five wallet addresses, generated offline in your browser.">
+<meta property="og:description" content="One tap: a 12- or 24-word seed phrase and five wallet addresses, generated offline in your browser.">
 <meta property="og:url" content="https://sol2go.lol/seedgen/">
 <meta property="og:image" content="https://sol2go.lol/seedgen/share.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -40,11 +40,15 @@
 <main>
   <section class="view" data-view-panel="gen">
     <h1>Seed phrase generator</h1>
-    <p class="lede">One tap — or a swipe — makes a fresh 24-word phrase and its Solana, Ethereum, Bitcoin, Tron and TON addresses.</p>
+    <p class="lede">One tap — or a swipe — makes a fresh 12- or 24-word phrase and its Solana, Ethereum, Bitcoin, Tron and TON addresses.</p>
 
     <article class="wallet" data-wallet aria-live="polite">
       <div class="wallet-head">
         <span class="stamp" data-stamp>…</span>
+        <div class="seg" role="group" aria-label="Phrase length">
+          <button type="button" data-words-count="12" aria-pressed="false" title="12-word phrase">12</button>
+          <button type="button" data-words-count="24" aria-pressed="true" title="24-word phrase">24</button>
+        </div>
         <button type="button" class="icon-btn star" data-star aria-pressed="false" title="Add to favourites">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.7 5.5 6 .9-4.35 4.25 1 6L12 17l-5.35 2.85 1-6L3.3 9.6l6-.9z"/></svg>
           <span class="visually-hidden">Add to favourites</span>
@@ -68,7 +72,7 @@
   <section class="about">
     <h2>How the seed phrase is made</h2>
     <p>Everything runs in this page. The phrase comes from your device's own random generator, the addresses are derived on the spot, and nothing is sent anywhere — the page works with the network switched off.</p>
-    <p>The 24 words are a standard BIP39 phrase that is also a valid TON mnemonic, so the same phrase opens all five wallets:</p>
+    <p>A 24-word phrase is a standard BIP39 phrase that is also a valid TON mnemonic, so the same words open all five wallets. A TON mnemonic is always 24 words, so a 12-word phrase is BIP39 only: its TON address is the one Trust Wallet derives, and Tonkeeper will not take it.</p>
     <table>
       <thead><tr><th>Chain</th><th>Path</th><th>Opens in</th></tr></thead>
       <tbody data-paths></tbody>

@@ -82,7 +82,12 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
   user-select: none;
 }
 .wallet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.stamp { color: var(--muted); font-size: .85rem; }
+.stamp { color: var(--muted); font-size: .8rem; margin-right: auto; white-space: nowrap; }
+/* A date never breaks: at 320px it ends 18px short of the length switch. */
+.wallet-head { gap: 8px; }
+.seg { display: flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; }
+.seg button { border: 0; background: none; min-width: 42px; min-height: 44px; border-radius: 999px; font-weight: 700; font-size: .85rem; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--tint); color: var(--accent); }
 .icon-btn { border: 0; background: none; width: 44px; height: 44px; margin: -8px -8px -8px 0; display: grid; place-items: center; border-radius: 50%; }
 .star svg { width: 26px; height: 26px; fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-linejoin: round; }
 .star[aria-pressed="true"] svg { fill: #F5B400; stroke: #F5B400; }

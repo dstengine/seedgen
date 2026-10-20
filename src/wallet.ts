@@ -2,12 +2,16 @@
 // nothing it computes leaves it: no request is made while generating, and
 // the page's CSP forbids one (see index.html).
 //
-// The phrase is 24 BIP39 words chosen so that it is also a valid TON
-// mnemonic. A BIP39 phrase carries its own checksum; a TON one is any 24
-// words from the same list whose HMAC passes TON's "basic seed" test, which
-// one random phrase in 256 does. So we draw BIP39 entropy until the phrase
-// passes both, and the same words import into Phantom, MetaMask, TronLink,
-// a Bitcoin wallet and Tonkeeper alike.
+// A 24-word phrase is chosen so that it is also a valid TON mnemonic. A
+// BIP39 phrase carries its own checksum; a TON one is any 24 words from the
+// same list whose HMAC passes TON's "basic seed" test, which one random
+// phrase in 256 does. So we draw BIP39 entropy until the phrase passes both,
+// and the same words import into Phantom, MetaMask, TronLink, a Bitcoin
+// wallet and Tonkeeper alike.
+//
+// A TON mnemonic is always 24 words, so a 12-word phrase is BIP39 only and
+// its TON address is the one Trust Wallet derives from BIP39:
+// m/44'/607'/0' on ed25519, wallet v4R2 (wallet-core's tw_ton).
 import { generateMnemonic, mnemonicToSeed, validateMnemonic } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english.js";
 import { HDKey } from "@scure/bip32";
@@ -38,6 +42,16 @@ export const CHAINS: { id: Chain; name: string; path: string; note: string }[] =
   { id: "TON", name: "TON (Gram)", path: "TON mnemonic, W5", note: "Tonkeeper, MyTonWallet" },
 ];
 
+export type WordCount = 12 | 24;
+
+/** How a phrase of this length reaches TON: the TON row of the table. */
+export const TON_SCHEME: Record<WordCount, { path: string; note: string }> = {
+  24: { path: "TON mnemonic, W5", note: "Tonkeeper, MyTonWallet" },
+  12: { path: "m/44'/607'/0', v4R2", note: "Trust Wallet" },
+};
+
+export const wordCount = (phrase: string): WordCount => (phrase.trim().split(/\s+/).length === 12 ? 12 : 24);
+
 const subtle = globalThis.crypto.subtle;
 
 async function pbkdf2Sha512(password: Uint8Array, salt: string, iterations: number): Promise<Uint8Array> {
@@ -65,7 +79,8 @@ export async function isDualPhrase(phrase: string): Promise<boolean> {
   return validateMnemonic(phrase, wordlist) && (await isTonBasicSeed(phrase));
 }
 
-export async function newPhrase(): Promise<string> {
+export async function newPhrase(words: WordCount = 24): Promise<string> {
+  if (words === 12) return generateMnemonic(wordlist, 128);
   for (;;) {
     const phrase = generateMnemonic(wordlist, 256);
     if (await isTonBasicSeed(phrase)) return phrase;
@@ -120,14 +135,18 @@ function slip10Ed25519(seed: Uint8Array, path: string): Uint8Array {
 // A TON wallet's address is the hash of the contract it would deploy: the
 // wallet code, plus a data cell holding the public key. @ton/ton computes
 // it through @ton/core and @ton/crypto — 270 KB for one hash — so the cell
-// hashing is written out here instead, for the single wallet we make:
-// W5 (v5r1), mainnet, workchain 0, subwallet 0, the one Tonkeeper creates.
-// tests/wallet.test.mjs holds the result to @ton/ton's.
-const W5_CODE_HASH = hexToBytes("20834b7b72b112147e1b2fb457b84e74d1a30f04f737d4f62a668e9552d2b72f");
-const W5_CODE_DEPTH = 6;
-// networkGlobalId (-239, mainnet) XOR the client context (workchain 0,
-// version v5r1, subwallet 0), as storeWalletIdV5R1 packs it.
+// hashing is written out here instead, for the two wallets we make, both
+// mainnet, workchain 0, default subwallet. tests/wallet.test.mjs holds the
+// results to @ton/ton's and to wallet-core's vectors.
+//
+// W5 (v5r1), the one Tonkeeper creates. Its wallet id is networkGlobalId
+// (-239, mainnet) XOR the client context (workchain 0, version v5r1,
+// subwallet 0), as storeWalletIdV5R1 packs it.
+const W5 = { hash: hexToBytes("20834b7b72b112147e1b2fb457b84e74d1a30f04f737d4f62a668e9552d2b72f"), depth: 6 };
 const W5_WALLET_ID = 0x7fffff11;
+// v4R2, the one Trust Wallet uses. Wallet id 698983191 + workchain.
+const V4R2 = { hash: hexToBytes("feb5ff6820e2ff0d9483e7e0d62c817d846789fb4ae580c878866d959dabd5c0"), depth: 7 };
+const V4_WALLET_ID = 698983191;
 
 /** Bits written MSB-first, then TON's completion tag: a 1 and zeros. */
 class Bits {
@@ -171,20 +190,13 @@ function crc16(data: Uint8Array): number {
   return crc;
 }
 
-export function tonW5Address(publicKey: Uint8Array): string {
-  const data = new Bits().push(1, 1).push(0, 32).push(W5_WALLET_ID, 32);
-  for (const b of publicKey) data.push(b, 8);
-  data.bit(0); // no extensions
-  const dataHash = cellHash(data, []);
+/** Non-bounceable user-friendly address (UQ…) of a wallet contract. */
+function walletAddress(code: { hash: Uint8Array; depth: number }, data: Bits): string {
   // StateInit: no split_depth, no special, code, data, no library.
-  const init = cellHash(new Bits().push(0b00110, 5), [
-    { hash: W5_CODE_HASH, depth: W5_CODE_DEPTH },
-    { hash: dataHash, depth: 0 },
-  ]);
-  // User-friendly form, non-bounceable (UQ…) as wallets show their own.
+  const init = cellHash(new Bits().push(0b00110, 5), [code, { hash: cellHash(data, []), depth: 0 }]);
   const raw = new Uint8Array(36);
-  raw[0] = 0x51;
-  raw[1] = 0x00;
+  raw[0] = 0x51; // non-bounceable, mainnet — as wallets show their own
+  raw[1] = 0x00; // workchain 0
   raw.set(init, 2);
   const crc = crc16(raw.subarray(0, 34));
   raw[34] = crc >> 8;
@@ -192,9 +204,24 @@ export function tonW5Address(publicKey: Uint8Array): string {
   return base64urlnopad.encode(raw);
 }
 
-async function tonAddress(phrase: string): Promise<string> {
-  const seed = await pbkdf2Sha512(tonEntropy(phrase), "TON default seed", 100000);
-  return tonW5Address(ed25519.getPublicKey(seed.subarray(0, 32)));
+export function tonW5Address(publicKey: Uint8Array): string {
+  const data = new Bits().push(1, 1).push(0, 32).push(W5_WALLET_ID, 32);
+  for (const b of publicKey) data.push(b, 8);
+  data.bit(0); // no extensions
+  return walletAddress(W5, data);
+}
+
+export function tonV4Address(publicKey: Uint8Array): string {
+  const data = new Bits().push(0, 32).push(V4_WALLET_ID, 32);
+  for (const b of publicKey) data.push(b, 8);
+  data.bit(0); // no plugins
+  return walletAddress(V4R2, data);
+}
+
+async function tonAddress(phrase: string, seed: Uint8Array): Promise<string> {
+  if (wordCount(phrase) === 12) return tonV4Address(ed25519.getPublicKey(slip10Ed25519(seed, "m/44'/607'/0'")));
+  const tonSeed = await pbkdf2Sha512(tonEntropy(phrase), "TON default seed", 100000);
+  return tonW5Address(ed25519.getPublicKey(tonSeed.subarray(0, 32)));
 }
 
 export async function addressesOf(phrase: string): Promise<Record<Chain, string>> {
@@ -206,12 +233,12 @@ export async function addressesOf(phrase: string): Promise<Record<Chain, string>
     ETH: eip55(evmAddressBytes(secpAt(root, "m/44'/60'/0'/0/0"))),
     BTC: btcSegwit(secpAt(root, "m/84'/0'/0'/0/0")),
     TRX: tronAddress(secpAt(root, "m/44'/195'/0'/0/0")),
-    TON: await tonAddress(phrase),
+    TON: await tonAddress(phrase, seed),
   };
 }
 
-export async function newWallet(): Promise<Wallet> {
-  const phrase = await newPhrase();
+export async function newWallet(words: WordCount = 24): Promise<Wallet> {
+  const phrase = await newPhrase(words);
   return {
     id: bytesToHex(globalThis.crypto.getRandomValues(new Uint8Array(8))),
     phrase,
