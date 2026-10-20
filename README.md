@@ -65,3 +65,7 @@ npm test        # known-answer vectors for every chain; TON against @ton/ton and
 npm run serve   # dist/ on :4173
 npm run e2e     # Chromium at 320px, light and dark: generate, 12/24, swipe, favourites, offline notice
 ```
+
+## License
+
+[MIT](LICENSE).
