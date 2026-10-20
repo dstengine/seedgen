@@ -39,15 +39,15 @@ export const CHAINS: { id: Chain; name: string; path: string; note: string }[] =
   { id: "ETH", name: "Ethereum", path: "m/44'/60'/0'/0/0", note: "MetaMask, Rabby; any EVM chain" },
   { id: "BTC", name: "Bitcoin", path: "m/84'/0'/0'/0/0", note: "Native SegWit (bc1…)" },
   { id: "TRX", name: "Tron", path: "m/44'/195'/0'/0/0", note: "TronLink, Trust Wallet" },
-  { id: "TON", name: "TON (Gram)", path: "TON mnemonic, W5", note: "Tonkeeper, MyTonWallet" },
+  { id: "TON", name: "TON (Gram)", path: "TON mnemonic", note: "W5 · Tonkeeper, MyTonWallet" },
 ];
 
 export type WordCount = 12 | 24;
 
 /** How a phrase of this length reaches TON: the TON row of the table. */
-export const TON_SCHEME: Record<WordCount, { path: string; note: string }> = {
-  24: { path: "TON mnemonic, W5", note: "Tonkeeper, MyTonWallet" },
-  12: { path: "m/44'/607'/0', v4R2", note: "Trust Wallet" },
+export const TON_SCHEME: Record<WordCount, { path: string; contract: string; wallets: string }> = {
+  24: { path: "TON mnemonic", contract: "W5", wallets: "Tonkeeper, MyTonWallet" },
+  12: { path: "m/44'/607'/0'", contract: "v4R2", wallets: "Trust Wallet" },
 };
 
 export const wordCount = (phrase: string): WordCount => (phrase.trim().split(/\s+/).length === 12 ? 12 : 24);

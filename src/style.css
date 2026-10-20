@@ -10,6 +10,7 @@
   --on-accent: #FFFFFF;
   --tint: #F1E8FD;
   --danger: #C4232F;
+  --ok: #1E7F4F;
   --on-danger: #FFFFFF;
   --sol: #9945FF; --eth: #627EEA; --btc: #F7931A; --trx: #EB0029; --ton: #0098EA;
   --radius: 14px;
@@ -19,12 +20,12 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #120A1F; --surface: #1D1430; --ink: #F1ECF8; --muted: #A79BBB;
-    --line: #2F2445; --accent: #B98BFF; --on-accent: #1B0B33; --tint: #24103F; --danger: #FF6B75; --on-danger: #2A0508;
+    --line: #2F2445; --accent: #B98BFF; --on-accent: #1B0B33; --tint: #24103F; --danger: #FF6B75; --on-danger: #2A0508; --ok: #4FD18B;
   }
 }
 :root[data-theme="dark"] {
   --bg: #120A1F; --surface: #1D1430; --ink: #F1ECF8; --muted: #A79BBB;
-  --line: #2F2445; --accent: #B98BFF; --on-accent: #1B0B33; --tint: #24103F; --danger: #FF6B75; --on-danger: #2A0508;
+  --line: #2F2445; --accent: #B98BFF; --on-accent: #1B0B33; --tint: #24103F; --danger: #FF6B75; --on-danger: #2A0508; --ok: #4FD18B;
 }
 
 * { box-sizing: border-box; }
@@ -70,6 +71,23 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 /* In Telegram the app's own header carries the name. */
 .tma .mark { visibility: hidden; width: 0; }
 .tma .bar { justify-content: center; }
+
+/* ---- security notice */
+.notice {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent);
+  border-radius: 12px; padding: 10px 12px; margin: 0 0 14px;
+}
+.notice[data-state="offline"] { border-left-color: var(--ok); }
+.notice-icon { flex: none; width: 22px; height: 22px; margin-top: 1px; fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+.notice[data-state="offline"] .notice-icon { stroke: var(--ok); }
+.notice-icon .tick { display: none; }
+.notice[data-state="offline"] .notice-icon .tick { display: inline; }
+.notice-title { margin: 0; font-weight: 700; font-size: .95rem; }
+.notice-text { margin: 2px 0 0; font-size: .85rem; color: var(--muted); }
+.notice a, .about a { color: var(--accent); text-underline-offset: 2px; }
+.notice a { display: inline-block; padding: 12px 0; margin: -12px 0; }
+.about code { font-family: var(--mono); font-size: .85em; }
 
 /* ---- wallet card */
 .wallet {
@@ -157,7 +175,8 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 .about { margin: 2.5rem 0 1rem; color: var(--ink); font-size: .95rem; }
 .about p { margin: 0 0 .8rem; }
 .about table { width: 100%; border-collapse: collapse; font-size: .85rem; margin: 0 0 1rem; }
-.about th, .about td { text-align: left; padding: 6px 6px 6px 0; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+/* Words wrap between words, never inside one: "Ethereum" stays whole. */
+.about th, .about td { text-align: left; padding: 6px 6px 6px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
 .about th { color: var(--muted); font-weight: 600; }
 /* A derivation path is one token: it never breaks inside. */
 .about td:nth-child(2) { font-family: var(--mono); font-size: .75rem; white-space: nowrap; overflow-wrap: normal; }

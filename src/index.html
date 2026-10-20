@@ -42,6 +42,17 @@
     <h1>Seed phrase generator</h1>
     <p class="lede">One tap — or a swipe — makes a fresh 12- or 24-word phrase and its Solana, Ethereum, Bitcoin, Tron and TON addresses.</p>
 
+    <!-- Security notice. app.ts swaps the text with the connection: online
+         it says how to cut the network, offline it says that has worked. -->
+    <aside class="notice" data-net data-state="online" aria-live="polite">
+      <svg class="notice-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l8 3v6c0 4.9-3.4 9.1-8 10-4.6-.9-8-5.1-8-10v-6z"/><path class="tick" d="M8.5 12.2l2.4 2.4 4.6-4.8"/></svg>
+      <div>
+        <p class="notice-title" data-net-title>Works offline</p>
+        <p class="notice-text" data-net-text>Nothing you generate leaves this device. For extra safety, turn on airplane mode before you generate — the app keeps working without a connection.</p>
+        <p class="notice-text"><a href="https://github.com/dstengine/seedgen" rel="noopener" target="_blank" data-external>Open source on GitHub</a> — read the code that makes your phrase.</p>
+      </div>
+    </aside>
+
     <article class="wallet" data-wallet aria-live="polite">
       <div class="wallet-head">
         <span class="stamp" data-stamp>…</span>
@@ -71,7 +82,8 @@
 
   <section class="about">
     <h2>How the seed phrase is made</h2>
-    <p>Everything runs in this page. The phrase comes from your device's own random generator, the addresses are derived on the spot, and nothing is sent anywhere — the page works with the network switched off.</p>
+    <p>Everything runs in this page. The phrase comes from your device's own random generator, the addresses are derived on the spot, and nothing is sent anywhere — the page works with the network switched off, and once opened it opens again offline.</p>
+    <p>The code is open: <a href="https://github.com/dstengine/seedgen" rel="noopener" target="_blank" data-external>github.com/dstengine/seedgen</a>. The derivation lives in <code>src/wallet.ts</code>, and the tests hold every chain to published reference addresses.</p>
     <p>A 24-word phrase is a standard BIP39 phrase that is also a valid TON mnemonic, so the same words open all five wallets. A TON mnemonic is always 24 words, so a 12-word phrase is BIP39 only: its TON address is the one Trust Wallet derives, and Tonkeeper will not take it.</p>
     <table>
       <thead><tr><th>Chain</th><th>Path</th><th>Opens in</th></tr></thead>

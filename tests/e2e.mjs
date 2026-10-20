@@ -84,15 +84,22 @@ for (const scheme of ["light", "dark"]) {
   // Offline after the first visit.
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.reload();
+  assert.equal(await page.textContent("[data-net-title]"), "Works offline");
+  assert.equal(await page.getAttribute('[data-net] a', "href"), "https://github.com/dstengine/seedgen");
   await ctx.setOffline(true);
+  // The notice follows the connection without a reload...
+  await page.waitForFunction(() => document.querySelector("[data-net]").dataset.state === "offline");
+  await page.screenshot({ path: `${shots}/offline-320-${scheme}.png` });
   await page.reload();
   await page.waitForFunction(() => document.querySelectorAll("[data-words] li").length === 24);
+  // ...and says so on a page opened offline.
+  assert.equal(await page.textContent("[data-net-title]"), "You're offline");
   await ctx.setOffline(false);
 
   assert.deepEqual(errors, [], "console errors");
   assert.deepEqual(foreign, [], "requests outside the page's own files");
   assert.notEqual(first, second);
-  console.log(`ok  ${scheme}: generate, 12/24, swipe back, favourite, two-tap delete, offline, no outside requests`);
+  console.log(`ok  ${scheme}: generate, 12/24, swipe back, favourite, two-tap delete, offline + notice, no outside requests`);
   await ctx.close();
 }
 await browser.close();

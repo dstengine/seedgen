@@ -49,6 +49,13 @@ tests can hold the result to them.
 - Telegram's `telegram-web-app.js` is loaded only when the page is opened as
   a Mini App (`tgWebAppData` in the URL), never on the open web.
 - Favourites are stored unencrypted on the device. The page says so.
+- A notice on the page follows `navigator.onLine`: online it suggests
+  airplane mode before generating, since the app keeps working; offline it
+  says nothing can leave the device. The service worker makes the page open
+  offline too once it has been loaded.
+- The source is public (this repo), linked from the notice and the "How
+  the seed phrase is made" section. Inside Telegram the link opens through
+  `WebApp.openLink`.
 
 ## Commands
 
@@ -56,5 +63,5 @@ tests can hold the result to them.
 npm run build   # dist/
 npm test        # known-answer vectors for every chain; TON against @ton/ton and wallet-core
 npm run serve   # dist/ on :4173
-npm run e2e     # Chromium at 320px, light and dark: generate, 12/24, swipe, favourites, offline
+npm run e2e     # Chromium at 320px, light and dark: generate, 12/24, swipe, favourites, offline notice
 ```

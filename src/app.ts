@@ -50,6 +50,7 @@ interface TgWebApp {
   BackButton: { show(): void; hide(): void; onClick(cb: () => void): void };
   onEvent(name: string, cb: () => void): void;
   disableVerticalSwipes?(): void;
+  openLink?(url: string): void;
 }
 
 let tg: TgWebApp | undefined;
@@ -170,7 +171,7 @@ function render(w: Wallet) {
       btn.type = "button";
       btn.title = `Copy ${c.name} address`;
       // TON opens in a different wallet depending on the phrase's length.
-      const name = c.id === "TON" ? `${c.name} · ${TON_SCHEME[wordCount(w.phrase)].note.split(",")[0]}` : c.name;
+      const name = c.id === "TON" ? `${c.name} · ${TON_SCHEME[wordCount(w.phrase)].wallets.split(",")[0]}` : c.name;
       btn.append(el("span", `chip chip-${c.id.toLowerCase()}`, c.id), el("span", "addr-name", name), el("code", "addr-value", w.addresses[c.id]));
       btn.addEventListener("click", () => copy(w.addresses[c.id], `${c.name} address`));
       li.append(btn);
@@ -323,6 +324,18 @@ function renderFavs() {
   );
 }
 
+// ---------------------------------------------------------------- network notice
+
+function syncNet() {
+  const online = navigator.onLine;
+  const box = $("[data-net]");
+  box.dataset.state = online ? "online" : "offline";
+  $("[data-net-title]").textContent = online ? "Works offline" : "You're offline";
+  $("[data-net-text]").textContent = online
+    ? "Nothing you generate leaves this device. For extra safety, turn on airplane mode before you generate — the app keeps working without a connection."
+    : "Nothing can leave this device now. Generate as many as you like — the app works fully offline.";
+}
+
 // ---------------------------------------------------------------- views
 
 function show(view: "gen" | "fav") {
@@ -346,7 +359,7 @@ function start() {
   };
   $("[data-paths]").replaceChildren(
     ...CHAINS.filter((c) => c.id !== "TON").map((c) => row(c.name, c.path, c.note)),
-    ...([24, 12] as const).map((n) => row(`TON, ${n} words`, TON_SCHEME[n].path, TON_SCHEME[n].note)),
+    ...([24, 12] as const).map((n) => row(`TON, ${n} words`, TON_SCHEME[n].path, `${TON_SCHEME[n].contract} · ${TON_SCHEME[n].wallets}`)),
   );
   document.querySelectorAll<HTMLElement>("[data-words-count]").forEach((b) =>
     b.addEventListener("click", () => setWords(Number(b.dataset.wordsCount) as WordCount)),
@@ -364,6 +377,19 @@ function start() {
     if (e.key === "ArrowRight" || e.key === "n") generate();
     if (e.key === "ArrowLeft") back();
   });
+
+  syncNet();
+  window.addEventListener("online", syncNet);
+  window.addEventListener("offline", syncNet);
+
+  // Inside Telegram an outside link opens in its browser, not over the app.
+  document.querySelectorAll<HTMLAnchorElement>("a[data-external]").forEach((a) =>
+    a.addEventListener("click", (e) => {
+      if (!tg?.openLink) return;
+      e.preventDefault();
+      tg.openLink(a.href);
+    }),
+  );
 
   renderFavs();
   generate();
