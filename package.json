@@ -1,0 +1,28 @@
+{
+  "name": "seedgen",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node tests/wallet.test.mjs",
+    "build": "node build.mjs",
+    "serve": "npx -y serve -l 4173 dist",
+    "e2e": "node tests/e2e.mjs"
+  },
+  "type": "module",
+  "dependencies": {
+    "@noble/curves": "2.4.0",
+    "@noble/hashes": "2.4.0",
+    "@scure/base": "2.4.0",
+    "@scure/bip32": "2.4.0",
+    "@scure/bip39": "2.4.0"
+  },
+  "devDependencies": {
+    "@ton/core": "0.63.1",
+    "@ton/crypto": "3.3.0",
+    "@ton/ton": "16.3.0",
+    "esbuild": "0.28.2",
+    "playwright": "1.64.1",
+    "sharp": "0.35.5",
+    "typescript": "7.0.2"
+  },
+  "private": true
+}

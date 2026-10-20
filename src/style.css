@@ -1,0 +1,183 @@
+/* Accent from sol2go, which this opens under for now. In Telegram the
+   Mini App's own theme replaces these tokens (applyTheme in app.ts). */
+:root {
+  --bg: #F6F3FB;
+  --surface: #FFFFFF;
+  --ink: #1B1326;
+  --muted: #6D6380;
+  --line: #E4DCF0;
+  --accent: #6B24C4;
+  --on-accent: #FFFFFF;
+  --tint: #F1E8FD;
+  --danger: #C4232F;
+  --on-danger: #FFFFFF;
+  --sol: #9945FF; --eth: #627EEA; --btc: #F7931A; --trx: #EB0029; --ton: #0098EA;
+  --radius: 14px;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #120A1F; --surface: #1D1430; --ink: #F1ECF8; --muted: #A79BBB;
+    --line: #2F2445; --accent: #B98BFF; --on-accent: #1B0B33; --tint: #24103F; --danger: #FF6B75; --on-danger: #2A0508;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #120A1F; --surface: #1D1430; --ink: #F1ECF8; --muted: #A79BBB;
+  --line: #2F2445; --accent: #B98BFF; --on-accent: #1B0B33; --tint: #24103F; --danger: #FF6B75; --on-danger: #2A0508;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+h1, h2 { line-height: 1.2; margin: 0 0 .35rem; }
+h1 { font-size: 1.6rem; letter-spacing: -.01em; }
+h2 { font-size: 1.25rem; }
+.lede { color: var(--muted); margin: 0 0 1rem; }
+.visually-hidden, .offscreen { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.offscreen { left: -9999px; }
+
+main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+
+/* ---- top bar */
+.bar {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  max-width: 640px; margin: 0 auto;
+  padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  background: var(--bg);
+}
+.mark { display: inline-flex; align-items: center; min-height: 44px; font-weight: 800; letter-spacing: -.02em; font-size: 1.15rem; color: var(--accent); text-decoration: none; }
+.tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.tab { border: 0; background: none; padding: 7px 12px; border-radius: 999px; font-size: .9rem; font-weight: 600; color: var(--muted); white-space: nowrap; min-height: 44px; }
+.tab[aria-current="page"] { background: var(--accent); color: var(--on-accent); }
+.count { display: inline-block; min-width: 1.4em; padding: 0 .35em; border-radius: 999px; background: var(--tint); color: var(--accent); font-size: .75rem; text-align: center; }
+.tab[aria-current="page"] .count { background: var(--on-accent); }
+/* Under 360px the wordmark and both tabs don't fit one row; the h1 below
+   names the page, so the wordmark goes. */
+@media (max-width: 359px) {
+  .mark { display: none; }
+  .bar { justify-content: center; }
+}
+/* In Telegram the app's own header carries the name. */
+.tma .mark { visibility: hidden; width: 0; }
+.tma .bar { justify-content: center; }
+
+/* ---- wallet card */
+.wallet {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  touch-action: pan-y;
+  transition: transform .18s ease-out;
+  user-select: none;
+}
+.wallet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.stamp { color: var(--muted); font-size: .85rem; }
+.icon-btn { border: 0; background: none; width: 44px; height: 44px; margin: -8px -8px -8px 0; display: grid; place-items: center; border-radius: 50%; }
+.star svg { width: 26px; height: 26px; fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-linejoin: round; }
+.star[aria-pressed="true"] svg { fill: #F5B400; stroke: #F5B400; }
+
+.words {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px;
+  counter-reset: w;
+  user-select: text;
+}
+.words li {
+  counter-increment: w;
+  background: var(--tint); border-radius: 8px; padding: 6px 6px 6px 8px;
+  font-family: var(--mono); font-size: .9rem; white-space: nowrap;
+}
+/* A seed word is never cut: "champion" is the longest the list has (8). */
+@media (max-width: 374px) {
+  .words { gap: 4px; }
+  .words li { font-size: .75rem; padding: 5px 3px; }
+  .words li::before { margin-right: 2px; min-width: 1.2em; }
+}
+.words li::before { content: counter(w); color: var(--muted); font-size: .7rem; margin-right: 5px; display: inline-block; min-width: 1.3em; text-align: right; }
+@media (min-width: 520px) { .words { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+.copy-phrase {
+  width: 100%; margin: 10px 0 14px; min-height: 44px;
+  border: 1px solid var(--accent); background: none; color: var(--accent);
+  border-radius: 10px; font-weight: 600;
+}
+
+.addresses { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.addr {
+  width: 100%; text-align: left; border: 1px solid var(--line); background: none;
+  border-radius: 10px; padding: 8px 10px; min-height: 44px;
+  display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center;
+}
+.addr:active { background: var(--tint); }
+.chip { grid-row: span 2; font: 700 .7rem/1 var(--mono); color: #fff; padding: 6px 0; width: 40px; text-align: center; border-radius: 6px; }
+.chip-sol { background: var(--sol); } .chip-eth { background: var(--eth); } .chip-btc { background: var(--btc); }
+.chip-trx { background: var(--trx); } .chip-ton { background: var(--ton); }
+/* White fails AA on the lighter brand colours; dark ink passes on all three. */
+.chip-eth, .chip-btc, .chip-ton { color: #120A1F; }
+.addr-name { font-size: .8rem; color: var(--muted); }
+.addr-value { font-family: var(--mono); font-size: .8rem; overflow-wrap: anywhere; word-break: break-all; }
+
+.hint { color: var(--muted); font-size: .85rem; text-align: center; margin: 10px 0 0; }
+@media (hover: hover) and (pointer: fine) { .hint { display: none; } }
+
+/* ---- favourites */
+.favs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.fav { display: flex; gap: 8px; align-items: stretch; }
+.fav-open {
+  flex: 1; min-width: 0; text-align: left; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 12px; padding: 10px 12px; display: grid; gap: 2px;
+}
+.fav-date { color: var(--muted); font-size: .8rem; }
+.fav-addr { font-family: var(--mono); font-size: .9rem; }
+.fav-words { font-family: var(--mono); font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fav-del {
+  flex: none; width: 76px; border: 1px solid var(--line); background: var(--surface); color: var(--danger);
+  border-radius: 12px; font-weight: 600; font-size: .9rem;
+}
+.fav-del[data-armed] { background: var(--danger); border-color: var(--danger); color: var(--on-danger); }
+.empty { color: var(--muted); }
+
+/* ---- about */
+.about { margin: 2.5rem 0 1rem; color: var(--ink); font-size: .95rem; }
+.about p { margin: 0 0 .8rem; }
+.about table { width: 100%; border-collapse: collapse; font-size: .85rem; margin: 0 0 1rem; }
+.about th, .about td { text-align: left; padding: 6px 6px 6px 0; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+.about th { color: var(--muted); font-weight: 600; }
+/* A derivation path is one token: it never breaks inside. */
+.about td:nth-child(2) { font-family: var(--mono); font-size: .75rem; white-space: nowrap; overflow-wrap: normal; }
+[data-view="fav"] .about { display: none; }
+
+/* ---- dock */
+.dock {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--bg) 70%, transparent);
+  display: flex; justify-content: center;
+}
+.generate {
+  width: 100%; max-width: 608px; min-height: 54px; border: 0; border-radius: 14px;
+  background: var(--accent); color: var(--on-accent); font-size: 1.1rem; font-weight: 700;
+}
+.generate:disabled { opacity: .7; }
+[data-view="fav"] .dock { display: none; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 999px; font-size: .9rem; z-index: 10;
+  max-width: calc(100% - 32px); text-align: center;
+}
+.noscript { margin: 16px; padding: 12px; border: 1px solid var(--danger); border-radius: 10px; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .wallet { transition: none; } }

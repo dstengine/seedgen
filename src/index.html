@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Nothing on this page talks to a server: no fetch, no analytics, no
+     fonts. The one outside script is Telegram's, and app.ts adds it only
+     when the page is opened as a Mini App, where Telegram is the host
+     anyway. Repeated as a header in vercel.json. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://telegram.org; style-src 'self'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Seed phrase generator — Solana, Bitcoin, Ethereum, Tron, TON</title>
+<meta name="description" content="Seed phrase generator: one tap makes a 24-word phrase and its Solana, Ethereum, Bitcoin, Tron and TON wallet addresses, offline in your browser.">
+<link rel="canonical" href="https://sol2go.lol/seedgen/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Seed phrase generator — Solana, Bitcoin, Ethereum, Tron, TON">
+<meta property="og:description" content="One tap: a 24-word seed phrase and five wallet addresses, generated offline in your browser.">
+<meta property="og:url" content="https://sol2go.lol/seedgen/">
+<meta property="og:image" content="https://sol2go.lol/seedgen/share.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#F6F3FB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#120A1F" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Seedgen">
+<link rel="stylesheet" href="style.css?v=__VERSION__">
+<script type="module" src="app.js?v=__VERSION__"></script>
+</head>
+<body>
+<header class="bar">
+  <a class="mark" href="./" title="Seed phrase generator">seedgen</a>
+  <nav class="tabs" aria-label="Views">
+    <button type="button" class="tab" data-view="gen" aria-current="page">Generate</button>
+    <button type="button" class="tab" data-view="fav">Favourites <span class="count" data-fav-count hidden></span></button>
+  </nav>
+</header>
+
+<main>
+  <section class="view" data-view-panel="gen">
+    <h1>Seed phrase generator</h1>
+    <p class="lede">One tap — or a swipe — makes a fresh 24-word phrase and its Solana, Ethereum, Bitcoin, Tron and TON addresses.</p>
+
+    <article class="wallet" data-wallet aria-live="polite">
+      <div class="wallet-head">
+        <span class="stamp" data-stamp>…</span>
+        <button type="button" class="icon-btn star" data-star aria-pressed="false" title="Add to favourites">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.7 5.5 6 .9-4.35 4.25 1 6L12 17l-5.35 2.85 1-6L3.3 9.6l6-.9z"/></svg>
+          <span class="visually-hidden">Add to favourites</span>
+        </button>
+      </div>
+      <ol class="words" data-words></ol>
+      <button type="button" class="copy-phrase" data-copy-phrase>Copy phrase</button>
+      <ul class="addresses" data-addresses></ul>
+    </article>
+
+    <p class="hint">Swipe the card left for a new one, right to go back.</p>
+  </section>
+
+  <section class="view" data-view-panel="fav" hidden>
+    <h2>Favourites</h2>
+    <p class="lede">Kept on this device only, unencrypted. Tap one to open it.</p>
+    <ul class="favs" data-favs></ul>
+    <p class="empty" data-favs-empty>Nothing saved yet. Star a wallet to keep it here.</p>
+  </section>
+
+  <section class="about">
+    <h2>How the seed phrase is made</h2>
+    <p>Everything runs in this page. The phrase comes from your device's own random generator, the addresses are derived on the spot, and nothing is sent anywhere — the page works with the network switched off.</p>
+    <p>The 24 words are a standard BIP39 phrase that is also a valid TON mnemonic, so the same phrase opens all five wallets:</p>
+    <table>
+      <thead><tr><th>Chain</th><th>Path</th><th>Opens in</th></tr></thead>
+      <tbody data-paths></tbody>
+    </table>
+    <p>A phrase is the wallet. Anyone who sees it can spend from it, and anything kept in a browser can be lost with it. For money that matters, write the words down on paper and keep them offline.</p>
+  </section>
+</main>
+
+<div class="dock">
+  <button type="button" class="generate" data-generate>Generate</button>
+</div>
+
+<div class="toast" data-toast role="status" hidden></div>
+<noscript><p class="noscript">The generator runs in your browser and needs JavaScript.</p></noscript>
+</body>
+</html>
