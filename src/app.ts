@@ -1,4 +1,4 @@
-import { CHAINS, TON_SCHEME, newWallet, wordCount, type Wallet, type WordCount } from "./wallet";
+import { CHAINS, TON_SCHEME, TRUST_PATHS, newWallet, trustAddressesOf, wordCount, type Chain, type Wallet, type WordCount } from "./wallet";
 
 const $ = <T extends Element = HTMLElement>(sel: string) => document.querySelector(sel) as T;
 
@@ -143,6 +143,18 @@ function stamp(iso: string): string {
   return new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
+/** An icon from the sprite in index.html. */
+function icon(name: string) {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("class", "ico");
+  svg.setAttribute("aria-hidden", "true");
+  const use = document.createElementNS(NS, "use");
+  use.setAttribute("href", `#i-${name}`);
+  svg.append(use);
+  return svg;
+}
+
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -166,19 +178,41 @@ function render(w: Wallet) {
   const list = $("[data-addresses]");
   list.replaceChildren(
     ...CHAINS.map((c) => {
-      const li = el("li");
-      const btn = el("button", "addr");
-      btn.type = "button";
-      btn.title = `Copy ${c.name} address`;
       // TON opens in a different wallet depending on the phrase's length.
       const name = c.id === "TON" ? `${c.name} · ${TON_SCHEME[wordCount(w.phrase)].wallets.split(",")[0]}` : c.name;
-      btn.append(el("span", `chip chip-${c.id.toLowerCase()}`, c.id), el("span", "addr-name", name), el("code", "addr-value", w.addresses[c.id]));
-      btn.addEventListener("click", () => copy(w.addresses[c.id], `${c.name} address`));
-      li.append(btn);
-      return li;
+      return addrRow(c.id, name, w.addresses[c.id]);
     }),
   );
+  renderTrust(w);
   syncStar();
+}
+
+function addrRow(id: Chain, name: string, address: string) {
+  const li = el("li");
+  const btn = el("button", "addr");
+  btn.type = "button";
+  btn.title = `Copy ${name} address`;
+  btn.append(el("span", `chip chip-${id.toLowerCase()}`, id), el("span", "addr-name", name), el("code", "addr-value", address), icon("copy"));
+  btn.addEventListener("click", () => copy(address, `${name} address`));
+  li.append(btn);
+  return li;
+}
+
+// What the same words show in Trust Wallet. Only the chains where it
+// differs from the rows above get a row of their own; the line above them
+// names the ones that match, so nobody hunts for a missing balance.
+async function renderTrust(w: Wallet) {
+  // Favourites saved before this existed carry no Trust addresses.
+  const trust = w.trust ?? (w.trust = await trustAddressesOf(w.phrase));
+  if (current() !== w) return;
+  const differs = (["SOL", "TON"] as const).filter((id) => trust[id] !== w.addresses[id]);
+  const same = CHAINS.filter((c) => !differs.includes(c.id as "SOL" | "TON")).map((c) => c.name.replace(/ \(.*/, ""));
+  const list = (names: string[]) => names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : names[0];
+  $("[data-trust-text]").textContent =
+    `${list(same)} are the same as above. Trust Wallet takes ${differs.length > 1 ? "Solana and TON from its own paths" : "Solana from its own path"}:`;
+  $("[data-trust-list]").replaceChildren(
+    ...differs.map((id) => addrRow(id, `${CHAINS.find((c) => c.id === id)!.name.replace(/ \(.*/, "")} · Trust Wallet`, trust[id])),
+  );
 }
 
 function syncStar() {
@@ -197,7 +231,8 @@ async function generate() {
   busy = true;
   const btn = $<HTMLButtonElement>("[data-generate]");
   btn.disabled = true;
-  btn.textContent = "Generating…";
+  const label = btn.querySelector("[data-label]")!;
+  label.textContent = "Generating…";
   try {
     const w = await newWallet(words);
     history.splice(at + 1);
@@ -211,7 +246,7 @@ async function generate() {
   } finally {
     busy = false;
     btn.disabled = false;
-    btn.textContent = "Generate";
+    label.textContent = "Generate";
   }
 }
 
@@ -295,8 +330,10 @@ function renderFavs() {
       });
 
       // One tap arms it, the second within three seconds deletes.
-      const del = el("button", "fav-del", "Delete");
+      const del = el("button", "fav-del");
+      const delLabel = el("span", "", "Delete");
       del.type = "button";
+      del.append(icon("trash"), delLabel);
       let timer = 0;
       del.addEventListener("click", () => {
         if (del.dataset.armed) {
@@ -310,11 +347,11 @@ function renderFavs() {
           return;
         }
         del.dataset.armed = "1";
-        del.textContent = "Sure?";
+        delLabel.textContent = "Sure?";
         haptic("tap");
         timer = window.setTimeout(() => {
           delete del.dataset.armed;
-          del.textContent = "Delete";
+          delLabel.textContent = "Delete";
         }, CONFIRM_MS);
       });
 
@@ -359,7 +396,9 @@ function start() {
   };
   $("[data-paths]").replaceChildren(
     ...CHAINS.filter((c) => c.id !== "TON").map((c) => row(c.name, c.path, c.note)),
-    ...([24, 12] as const).map((n) => row(`TON, ${n} words`, TON_SCHEME[n].path, `${TON_SCHEME[n].contract} · ${TON_SCHEME[n].wallets}`)),
+    row("Solana in Trust Wallet", TRUST_PATHS.SOL, "Trust Wallet"),
+    row("TON, 24 words", TON_SCHEME[24].path, `${TON_SCHEME[24].contract} · ${TON_SCHEME[24].wallets}`),
+    row("TON in Trust Wallet, 12 or 24 words", TRUST_PATHS.TON, "v4R2 · Trust Wallet"),
   );
   document.querySelectorAll<HTMLElement>("[data-words-count]").forEach((b) =>
     b.addEventListener("click", () => setWords(Number(b.dataset.wordsCount) as WordCount)),

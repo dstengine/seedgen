@@ -10,13 +10,14 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://telegram.org; style-src 'self'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <title>Seed phrase generator — Solana, Bitcoin, Ethereum, Tron, TON</title>
-<meta name="description" content="Seed phrase generator: one tap makes a 12- or 24-word phrase and its Solana, Ethereum, Bitcoin, Tron and TON wallet addresses, offline in your browser.">
+<meta name="description" content="Seed phrase generator: one tap makes a 12- or 24-word phrase and its Solana, Ethereum, Bitcoin, Tron and TON addresses, Trust Wallet's included, offline in your browser.">
 <link rel="canonical" href="https://seedgen.uk/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Seed phrase generator — Solana, Bitcoin, Ethereum, Tron, TON">
 <meta property="og:description" content="One tap: a 12- or 24-word seed phrase and five wallet addresses, generated offline in your browser.">
 <meta property="og:url" content="https://seedgen.uk/">
 <meta property="og:image" content="https://seedgen.uk/share.png">
+<meta property="og:image:alt" content="Seed phrase generator for Solana, Bitcoin, Ethereum, Tron and TON">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#F6F3FB" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#120A1F" media="(prefers-color-scheme: dark)">
@@ -25,15 +26,26 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Seedgen">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebApplication", "name": "Seed phrase generator", "url": "https://seedgen.uk/", "description": "Generates a 12- or 24-word BIP39 seed phrase and its Solana, Ethereum, Bitcoin, Tron and TON addresses offline in the browser, including the addresses Trust Wallet shows.", "applicationCategory": "FinanceApplication", "operatingSystem": "Any (web browser)", "browserRequirements": "Requires JavaScript", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "license": "https://opensource.org/licenses/MIT", "codeRepository": "https://github.com/dstengine/seedgen", "image": "https://seedgen.uk/share.png"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is it safe to generate a seed phrase here?", "acceptedAnswer": {"@type": "Answer", "text": "The phrase is made in your browser from your device's own random generator and is never sent anywhere: the page makes no network request and its security policy forbids one. Turn on airplane mode before you generate and it still works. The code is open on GitHub to check."}}, {"@type": "Question", "name": "How do I import the seed phrase into Trust Wallet?", "acceptedAnswer": {"@type": "Answer", "text": "In Trust Wallet choose Add wallet, then I already have a wallet, then Secret phrase, and paste the 12 or 24 words. Trust Wallet shows the Ethereum, Bitcoin and Tron addresses listed on the card, and the Solana and TON addresses under In Trust Wallet."}}, {"@type": "Question", "name": "Why does Trust Wallet show a different Solana address than Phantom?", "acceptedAnswer": {"@type": "Answer", "text": "Each wallet derives Solana from the phrase along its own path: Phantom uses m/44'/501'/0'/0' and Trust Wallet m/44'/501'/0'. Both accounts belong to the same phrase. The card shows both, so you know which address each wallet will open."}}, {"@type": "Question", "name": "Should I pick 12 or 24 words?", "acceptedAnswer": {"@type": "Answer", "text": "Both are standard BIP39 phrases. A 24-word phrase from this generator is also a valid TON mnemonic, so it opens in Tonkeeper as well as in Trust Wallet, Phantom and MetaMask. A 12-word phrase is shorter to write down and works everywhere except Tonkeeper."}}, {"@type": "Question", "name": "Which wallets accept the phrase?", "acceptedAnswer": {"@type": "Answer", "text": "Trust Wallet for all five chains; Phantom, Solflare and Backpack for Solana; MetaMask and Rabby for Ethereum and other EVM chains; any BIP84 wallet for Bitcoin; TronLink for Tron; Tonkeeper and MyTonWallet for TON with 24 words."}}, {"@type": "Question", "name": "Does the generator work offline?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Once the page has loaded it needs no connection, and after the first visit it opens offline too. It can also be installed as an app from the browser menu or opened as a Telegram Mini App."}}]}]}</script>
 <link rel="stylesheet" href="style.css?v=__VERSION__">
 <script type="module" src="app.js?v=__VERSION__"></script>
 </head>
 <body>
+<!-- Icons: one inline sprite, so they cost no request. -->
+<svg class="sprite" aria-hidden="true">
+  <symbol id="i-dice" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1.1" class="dot"/><circle cx="15.5" cy="8.5" r="1.1" class="dot"/><circle cx="12" cy="12" r="1.1" class="dot"/><circle cx="8.5" cy="15.5" r="1.1" class="dot"/><circle cx="15.5" cy="15.5" r="1.1" class="dot"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.5 6 .9-4.35 4.25 1 6L12 17l-5.35 2.85 1-6L3.3 9.6l6-.9z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2.2"/><path d="M15.5 8.5V6.2A2.2 2.2 0 0 0 13.3 4H6.2A2.2 2.2 0 0 0 4 6.2v7.1a2.2 2.2 0 0 0 2.2 2.2h2.3"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V4.5h5V7M6.2 7l.9 12.5h9.8l.9-12.5M10 11v5M14 11v5"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="M8.5 7l-5 5 5 5M15.5 7l5 5-5 5M13.5 4.5l-3 15"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.5l8 3v6c0 4.9-3.4 9.1-8 10-4.6-.9-8-5.1-8-10v-6z"/><path d="M8.5 12.2l2.4 2.4 4.6-4.8"/></symbol>
+  <symbol id="i-swipe" viewBox="0 0 24 24"><path d="M4 9h12M4 9l3.5-3.5M4 9l3.5 3.5M20 15H8M20 15l-3.5-3.5M20 15l-3.5 3.5"/></symbol>
+</svg>
 <header class="bar">
   <a class="mark" href="./" title="Seed phrase generator">seedgen</a>
   <nav class="tabs" aria-label="Views">
-    <button type="button" class="tab" data-view="gen" aria-current="page">Generate</button>
-    <button type="button" class="tab" data-view="fav">Favourites <span class="count" data-fav-count hidden></span></button>
+    <button type="button" class="tab" data-view="gen" aria-current="page"><svg class="ico" aria-hidden="true"><use href="#i-dice"/></svg>Generate</button>
+    <button type="button" class="tab" data-view="fav"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg>Favourites <span class="count" data-fav-count hidden></span></button>
   </nav>
 </header>
 
@@ -41,6 +53,7 @@
   <section class="view" data-view-panel="gen">
     <h1>Seed phrase generator</h1>
     <p class="lede">One tap — or a swipe — makes a fresh 12- or 24-word phrase and its Solana, Ethereum, Bitcoin, Tron and TON addresses.</p>
+    <p class="compat"><span class="badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg>Trust Wallet compatible</span> The card shows each address as Trust Wallet will, next to Phantom's and Tonkeeper's.</p>
 
     <!-- Security notice. app.ts swaps the text with the connection: online
          it says how to cut the network, offline it says that has worked. -->
@@ -49,7 +62,7 @@
       <div>
         <p class="notice-title" data-net-title>Works offline</p>
         <p class="notice-text" data-net-text>Nothing you generate leaves this device. For extra safety, turn on airplane mode before you generate — the app keeps working without a connection.</p>
-        <p class="notice-text"><a href="https://github.com/dstengine/seedgen" rel="noopener" target="_blank" data-external>Open source on GitHub</a> — read the code that makes your phrase.</p>
+        <p class="notice-text"><a href="https://github.com/dstengine/seedgen" rel="noopener" target="_blank" data-external class="with-ico"><svg class="ico" aria-hidden="true"><use href="#i-code"/></svg>Open source on GitHub</a> — read the code that makes your phrase.</p>
       </div>
     </aside>
 
@@ -66,11 +79,16 @@
         </button>
       </div>
       <ol class="words" data-words></ol>
-      <button type="button" class="copy-phrase" data-copy-phrase>Copy phrase</button>
+      <button type="button" class="copy-phrase" data-copy-phrase><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg>Copy phrase</button>
       <ul class="addresses" data-addresses></ul>
+      <section class="trust" aria-labelledby="trust-title">
+        <h2 class="trust-title" id="trust-title"><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg>In Trust Wallet</h2>
+        <p class="trust-text" data-trust-text></p>
+        <ul class="addresses" data-trust-list></ul>
+      </section>
     </article>
 
-    <p class="hint">Swipe the card left for a new one, right to go back.</p>
+    <p class="hint"><svg class="ico" aria-hidden="true"><use href="#i-swipe"/></svg>Swipe the card left for a new one, right to go back.</p>
   </section>
 
   <section class="view" data-view-panel="fav" hidden>
@@ -85,16 +103,33 @@
     <p>Everything runs in this page. The phrase comes from your device's own random generator, the addresses are derived on the spot, and nothing is sent anywhere — the page works with the network switched off, and once opened it opens again offline.</p>
     <p>The code is open: <a href="https://github.com/dstengine/seedgen" rel="noopener" target="_blank" data-external>github.com/dstengine/seedgen</a>. The derivation lives in <code>src/wallet.ts</code>, and the tests hold every chain to published reference addresses.</p>
     <p>A 24-word phrase is a standard BIP39 phrase that is also a valid TON mnemonic, so the same words open all five wallets. A TON mnemonic is always 24 words, so a 12-word phrase is BIP39 only: its TON address is the one Trust Wallet derives, and Tonkeeper will not take it.</p>
+    <p>Trust Wallet takes any phrase from here, 12 or 24 words. It finds the same Ethereum, Bitcoin and Tron addresses, but it has its own paths for Solana and TON, so it shows those two at addresses of its own — the same coins are not in two places, they are two accounts. The card lists Trust Wallet's under "In Trust Wallet"; to see Phantom's Solana account in Trust Wallet, add it there with the derivation path set to Phantom's.</p>
     <table>
       <thead><tr><th>Chain</th><th>Path</th><th>Opens in</th></tr></thead>
       <tbody data-paths></tbody>
     </table>
     <p>A phrase is the wallet. Anyone who sees it can spend from it, and anything kept in a browser can be lost with it. For money that matters, write the words down on paper and keep them offline.</p>
   </section>
+
+  <section class="about faq">
+    <h2>Seed phrase generator: questions</h2>
+    <h3>Is it safe to generate a seed phrase here?</h3>
+    <p>The phrase is made in your browser from your device's own random generator and is never sent anywhere: the page makes no network request and its security policy forbids one. Turn on airplane mode before you generate and it still works. The code is open on GitHub to check.</p>
+    <h3>How do I import the seed phrase into Trust Wallet?</h3>
+    <p>In Trust Wallet choose Add wallet, then I already have a wallet, then Secret phrase, and paste the 12 or 24 words. Trust Wallet shows the Ethereum, Bitcoin and Tron addresses listed on the card, and the Solana and TON addresses under In Trust Wallet.</p>
+    <h3>Why does Trust Wallet show a different Solana address than Phantom?</h3>
+    <p>Each wallet derives Solana from the phrase along its own path: Phantom uses m/44'/501'/0'/0' and Trust Wallet m/44'/501'/0'. Both accounts belong to the same phrase. The card shows both, so you know which address each wallet will open.</p>
+    <h3>Should I pick 12 or 24 words?</h3>
+    <p>Both are standard BIP39 phrases. A 24-word phrase from this generator is also a valid TON mnemonic, so it opens in Tonkeeper as well as in Trust Wallet, Phantom and MetaMask. A 12-word phrase is shorter to write down and works everywhere except Tonkeeper.</p>
+    <h3>Which wallets accept the phrase?</h3>
+    <p>Trust Wallet for all five chains; Phantom, Solflare and Backpack for Solana; MetaMask and Rabby for Ethereum and other EVM chains; any BIP84 wallet for Bitcoin; TronLink for Tron; Tonkeeper and MyTonWallet for TON with 24 words.</p>
+    <h3>Does the generator work offline?</h3>
+    <p>Yes. Once the page has loaded it needs no connection, and after the first visit it opens offline too. It can also be installed as an app from the browser menu or opened as a Telegram Mini App.</p>
+  </section>
 </main>
 
 <div class="dock">
-  <button type="button" class="generate" data-generate>Generate</button>
+  <button type="button" class="generate" data-generate><svg class="ico" aria-hidden="true"><use href="#i-dice"/></svg><span data-label>Generate</span></button>
 </div>
 
 <div class="toast" data-toast role="status" hidden></div>

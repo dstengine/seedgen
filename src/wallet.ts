@@ -31,13 +31,24 @@ export interface Wallet {
   phrase: string;
   createdAt: string;
   addresses: Record<Chain, string>;
+  /** What Trust Wallet shows for the same phrase where it differs from
+   *  `addresses`. Absent on favourites saved before it existed. */
+  trust?: TrustAddresses;
 }
+
+/** Trust Wallet reads every phrase as BIP39 and uses its own defaults for
+ *  two chains: Solana at m/44'/501'/0' (Phantom adds a /0'), and TON at
+ *  m/44'/607'/0' as wallet v4R2 — for 24 words too, where Tonkeeper reads
+ *  the TON mnemonic instead. Ethereum, Bitcoin and Tron match as they are.
+ *  Paths from wallet-core's registry.json. */
+export type TrustAddresses = { SOL: string; TON: string };
+export const TRUST_PATHS = { SOL: "m/44'/501'/0'", TON: "m/44'/607'/0'" } as const;
 
 /** Order on screen. Solana first: the site this opens under is about it. */
 export const CHAINS: { id: Chain; name: string; path: string; note: string }[] = [
   { id: "SOL", name: "Solana", path: "m/44'/501'/0'/0'", note: "Phantom, Solflare, Backpack" },
-  { id: "ETH", name: "Ethereum", path: "m/44'/60'/0'/0/0", note: "MetaMask, Rabby; any EVM chain" },
-  { id: "BTC", name: "Bitcoin", path: "m/84'/0'/0'/0/0", note: "Native SegWit (bc1…)" },
+  { id: "ETH", name: "Ethereum", path: "m/44'/60'/0'/0/0", note: "MetaMask, Trust Wallet, Rabby; any EVM chain" },
+  { id: "BTC", name: "Bitcoin", path: "m/84'/0'/0'/0/0", note: "Native SegWit (bc1…) · Trust Wallet" },
   { id: "TRX", name: "Tron", path: "m/44'/195'/0'/0/0", note: "TronLink, Trust Wallet" },
   { id: "TON", name: "TON (Gram)", path: "TON mnemonic", note: "W5 · Tonkeeper, MyTonWallet" },
 ];
@@ -237,6 +248,14 @@ export async function addressesOf(phrase: string): Promise<Record<Chain, string>
   };
 }
 
+export async function trustAddressesOf(phrase: string): Promise<TrustAddresses> {
+  const seed = await mnemonicToSeed(phrase);
+  return {
+    SOL: base58.encode(ed25519.getPublicKey(slip10Ed25519(seed, TRUST_PATHS.SOL))),
+    TON: tonV4Address(ed25519.getPublicKey(slip10Ed25519(seed, TRUST_PATHS.TON))),
+  };
+}
+
 export async function newWallet(words: WordCount = 24): Promise<Wallet> {
   const phrase = await newPhrase(words);
   return {
@@ -244,5 +263,6 @@ export async function newWallet(words: WordCount = 24): Promise<Wallet> {
     phrase,
     createdAt: new Date().toISOString(),
     addresses: await addressesOf(phrase),
+    trust: await trustAddressesOf(phrase),
   };
 }

@@ -35,6 +35,24 @@ that path, v4R2). Tonkeeper will not import it. The other way round, Trust
 Wallet reads a 24-word phrase as BIP39 for TON too and shows a different TON
 address from Tonkeeper's; the card names the wallet on the TON row.
 
+## Trust Wallet
+
+Trust Wallet takes any phrase from here and reads it as BIP39, with its own
+defaults (wallet-core `registry.json`): Ethereum, Bitcoin (BIP84) and Tron
+match the card; Solana is `m/44'/501'/0'` (Phantom's has one more `/0'`) and
+TON is `m/44'/607'/0'` v4R2 for any length. The card shows those two under
+"In Trust Wallet" wherever they differ from the rows above, and the tests
+hold both to wallet-core's mnemonic vectors. Favourites saved before this
+get their Trust Wallet addresses derived when opened.
+
+## SEO
+
+One page, so the work is on it: the head keyword in the title, `h1` and
+description; a static FAQ answering the queries the page can win (import
+into Trust Wallet, Phantom vs Trust Wallet Solana address, 12 or 24 words,
+offline); JSON-LD with `WebApplication` and `FAQPage`; sitemap with every
+protocol field, `lastmod` from `src/updated.txt`.
+
 The TON address is computed in `src/wallet.ts` by hashing the wallet's
 StateInit directly (W5 and v4R2), rather than through `@ton/ton`, which would add 270 KB
 for one hash. `@ton/ton` and `@ton/crypto` stay as dev dependencies so the

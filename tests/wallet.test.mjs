@@ -55,6 +55,19 @@ for (const [priv, addr] of [
 ]) assert.equal(w.tonV4Address(ed25519.getPublicKey(Buffer.from(priv, "hex"))), addr);
 console.log("ok  v4R2 matches wallet-core's TON vectors");
 
+// Trust Wallet from a mnemonic, at its own default paths
+// (wallet-core tests: chains/Solana/TWSolanaAddressTests.cpp,
+// chains/TheOpenNetwork/TWAnyAddressTests.cpp).
+{
+  const sol = await w.trustAddressesOf("shoot island position soft burden budget tooth cruel issue economy destroy above");
+  assert.equal(sol.SOL, "2bUBiBNZyD29gP1oV6de7nxowMLoDBtopMMTGgMvjG5m");
+  const ton = await w.trustAddressesOf("stuff diamond cycle federal scan spread pigeon people engage teach snack grain");
+  assert.equal(ton.TON, "UQDYW_1eScJVxtitoBRksvoV9cCYo4uKGWLVNIHB1JqRRyQx");
+  // 12 words: the card's TON is already Trust's.
+  assert.equal((await w.addressesOf("stuff diamond cycle federal scan spread pigeon people engage teach snack grain")).TON, ton.TON);
+}
+console.log("ok  Trust Wallet's Solana and TON match wallet-core's mnemonic vectors");
+
 for (let i = 0; i < 5; i++) {
   const wallet = await w.newWallet(12);
   assert.equal(wallet.phrase.split(" ").length, 12);

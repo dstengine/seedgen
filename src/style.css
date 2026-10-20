@@ -29,6 +29,9 @@
 }
 
 * { box-sizing: border-box; }
+.sprite { display: none; }
+.ico { width: 1.15em; height: 1.15em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; vertical-align: -.2em; }
+.ico .dot, #i-dice .dot { fill: currentColor; stroke: none; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
@@ -58,13 +61,14 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 }
 .mark { display: inline-flex; align-items: center; min-height: 44px; font-weight: 800; letter-spacing: -.02em; font-size: 1.15rem; color: var(--accent); text-decoration: none; }
 .tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
-.tab { border: 0; background: none; padding: 7px 12px; border-radius: 999px; font-size: .9rem; font-weight: 600; color: var(--muted); white-space: nowrap; min-height: 44px; }
+.tab { display: inline-flex; align-items: center; gap: 5px; border: 0; background: none; padding: 7px 12px; border-radius: 999px; font-size: .9rem; font-weight: 600; color: var(--muted); white-space: nowrap; min-height: 44px; }
 .tab[aria-current="page"] { background: var(--accent); color: var(--on-accent); }
 .count { display: inline-block; min-width: 1.4em; padding: 0 .35em; border-radius: 999px; background: var(--tint); color: var(--accent); font-size: .75rem; text-align: center; }
 .tab[aria-current="page"] .count { background: var(--on-accent); }
 /* Under 360px the wordmark and both tabs don't fit one row; the h1 below
    names the page, so the wordmark goes. */
 @media (max-width: 359px) {
+  .tab .ico { display: none; }
   .mark { display: none; }
   .bar { justify-content: center; }
 }
@@ -86,6 +90,7 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 .notice-title { margin: 0; font-weight: 700; font-size: .95rem; }
 .notice-text { margin: 2px 0 0; font-size: .85rem; color: var(--muted); }
 .notice a, .about a { color: var(--accent); text-underline-offset: 2px; }
+.with-ico { display: inline-flex !important; align-items: center; gap: 5px; }
 .notice a { display: inline-block; padding: 12px 0; margin: -12px 0; }
 .about code { font-family: var(--mono); font-size: .85em; }
 
@@ -131,6 +136,7 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 @media (min-width: 520px) { .words { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
 .copy-phrase {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
   width: 100%; margin: 10px 0 14px; min-height: 44px;
   border: 1px solid var(--accent); background: none; color: var(--accent);
   border-radius: 10px; font-weight: 600;
@@ -140,18 +146,34 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 .addr {
   width: 100%; text-align: left; border: 1px solid var(--line); background: none;
   border-radius: 10px; padding: 8px 10px; min-height: 44px;
-  display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center;
+  display: grid; grid-template-columns: auto 1fr auto; column-gap: 8px; align-items: center;
 }
+.addr .ico { grid-column: 3; grid-row: 1 / span 2; color: var(--muted); }
 .addr:active { background: var(--tint); }
-.chip { grid-row: span 2; font: 700 .7rem/1 var(--mono); color: #fff; padding: 6px 0; width: 40px; text-align: center; border-radius: 6px; }
+.chip { grid-column: 1; grid-row: 1 / span 2; font: 700 .7rem/1 var(--mono); color: #fff; padding: 6px 0; width: 40px; text-align: center; border-radius: 6px; }
 .chip-sol { background: var(--sol); } .chip-eth { background: var(--eth); } .chip-btc { background: var(--btc); }
 .chip-trx { background: var(--trx); } .chip-ton { background: var(--ton); }
 /* White fails AA on the lighter brand colours; dark ink passes on all three. */
 .chip-eth, .chip-btc, .chip-ton { color: #120A1F; }
+.addr-name, .addr-value { grid-column: 2; }
 .addr-name { font-size: .8rem; color: var(--muted); }
 .addr-value { font-family: var(--mono); font-size: .8rem; overflow-wrap: anywhere; word-break: break-all; }
 
+/* ---- Trust Wallet */
+.compat { margin: -.5rem 0 1rem; font-size: .9rem; color: var(--muted); }
+.badge {
+  display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+  background: var(--tint); color: var(--accent); font-weight: 700; font-size: .8rem;
+  border-radius: 999px; padding: 3px 10px 3px 7px; margin-right: 4px;
+}
+.badge svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.trust { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line); }
+.trust-title { display: flex; align-items: center; gap: 6px; font-size: .95rem; margin: 0 0 2px; }
+.trust-title .ico { color: var(--accent); }
+.trust-text { font-size: .8rem; color: var(--muted); margin: 0 0 8px; }
+
 .hint { color: var(--muted); font-size: .85rem; text-align: center; margin: 10px 0 0; }
+.hint .ico { margin-right: 5px; }
 @media (hover: hover) and (pointer: fine) { .hint { display: none; } }
 
 /* ---- favourites */
@@ -165,6 +187,7 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 .fav-addr { font-family: var(--mono); font-size: .9rem; }
 .fav-words { font-family: var(--mono); font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fav-del {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   flex: none; width: 76px; border: 1px solid var(--line); background: var(--surface); color: var(--danger);
   border-radius: 12px; font-weight: 600; font-size: .9rem;
 }
@@ -180,6 +203,8 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 .about th { color: var(--muted); font-weight: 600; }
 /* A derivation path is one token: it never breaks inside. */
 .about td:nth-child(2) { font-family: var(--mono); font-size: .75rem; white-space: nowrap; overflow-wrap: normal; }
+.faq h3 { font-size: 1rem; margin: 1.1rem 0 .25rem; }
+.faq { margin-top: 1.5rem; }
 [data-view="fav"] .about { display: none; }
 
 /* ---- dock */
@@ -190,6 +215,7 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
   display: flex; justify-content: center;
 }
 .generate {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%; max-width: 608px; min-height: 54px; border: 0; border-radius: 14px;
   background: var(--accent); color: var(--on-accent); font-size: 1.1rem; font-weight: 700;
 }

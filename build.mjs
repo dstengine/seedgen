@@ -51,7 +51,7 @@ await sharp(Buffer.from(card)).png().toFile(dist("share.png").pathname);
 writeFileSync(dist("manifest.webmanifest"), JSON.stringify({
   name: "Seedgen — seed phrase generator",
   short_name: "Seedgen",
-  description: "A 24-word seed phrase and its Solana, Ethereum, Bitcoin, Tron and TON addresses in one tap, offline.",
+  description: "Seed phrase generator: a 12- or 24-word phrase and its Solana, Ethereum, Bitcoin, Tron and TON addresses, Trust Wallet's included, offline.",
   start_url: "./",
   scope: "./",
   display: "standalone",

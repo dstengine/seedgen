@@ -74,12 +74,17 @@ for (const scheme of ["light", "dark"]) {
   await page.click('[data-words-count="12"]');
   await page.waitForFunction(() => document.querySelectorAll("[data-words] li").length === 12);
   assert.match(await page.textContent("[data-addresses]"), /TON \(Gram\) · Trust Wallet/);
+  // 12 words: TON above is already Trust's, so only Solana differs.
+  await page.waitForFunction(() => document.querySelectorAll("[data-trust-list] li").length === 1);
+  assert.match(await page.textContent("[data-trust-list]"), /Solana · Trust Wallet/);
   await page.screenshot({ path: `${shots}/gen12-320-${scheme}.png` });
   await page.reload();
   await page.waitForFunction(() => document.querySelectorAll("[data-words] li").length === 12);
   await page.click('[data-words-count="24"]');
   await page.waitForFunction(() => document.querySelectorAll("[data-words] li").length === 24);
   assert.match(await page.textContent("[data-addresses]"), /TON \(Gram\) · Tonkeeper/);
+  await page.waitForFunction(() => document.querySelectorAll("[data-trust-list] li").length === 2);
+  assert.match(await page.textContent("[data-trust-text]"), /Ethereum, Bitcoin and Tron are the same/);
 
   // Offline after the first visit.
   await page.evaluate(() => navigator.serviceWorker.ready);
