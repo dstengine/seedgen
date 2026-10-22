@@ -166,7 +166,7 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 .qr h2 { margin: 0; font-size: 1.1rem; }
 .qr-code { width: min(100%, 60vh, 560px); }
 .qr-code svg { display: block; width: 100%; height: auto; border-radius: 8px; }
-.qr-address { display: block; max-width: 560px; font-family: var(--mono); font-size: .8rem; overflow-wrap: anywhere; word-break: break-all; user-select: text; }
+.qr-address { display: block; width: 100%; max-width: 560px; font-family: var(--mono); font-size: .8rem; white-space: nowrap; overflow: hidden; user-select: text; }
 .qr-close { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border: 0; background: none; color: var(--ink); border-radius: 50%; display: grid; place-items: center; }
 .qr-close:active { background: var(--tint); }
 .qr-close .ico { width: 1.5em; height: 1.5em; }

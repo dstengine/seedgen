@@ -230,9 +230,14 @@ function showQr(name: string, address: string) {
   svg.append(bg, path, label);
   $("[data-qr-title]").textContent = `${name} address`;
   $("[data-qr-code]").replaceChildren(svg);
-  $("[data-qr-address]").textContent = address;
+  const line = $("[data-qr-address]");
+  line.textContent = address;
   qrNow = { name, address };
   ($("[data-qr]") as HTMLDialogElement).showModal();
+  // One line whatever the length: shrink the type until it fits.
+  line.style.fontSize = "";
+  const fit = line.clientWidth / line.scrollWidth;
+  if (fit < 1) line.style.fontSize = `${Math.max(0.3, 0.8 * fit)}rem`;
 }
 
 function addrRow(id: Chain, name: string, address: string) {
