@@ -203,7 +203,9 @@ function showQr(name: string, address: string) {
     for (let x = 0; x < n; x++) if (qr.isDark(y, x)) d += `M${x + quiet} ${y + quiet}h1v1h-1z`;
   const NS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(NS, "svg");
-  svg.setAttribute("viewBox", `0 0 ${n + quiet * 2} ${n + quiet * 2}`);
+  const side = n + quiet * 2;
+  const foot = 5; // room under the code for the site's name
+  svg.setAttribute("viewBox", `0 0 ${side} ${side + foot}`);
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", `QR code of the ${name} address`);
   svg.setAttribute("shape-rendering", "crispEdges");
@@ -214,7 +216,16 @@ function showQr(name: string, address: string) {
   const path = document.createElementNS(NS, "path");
   path.setAttribute("d", d);
   path.setAttribute("fill", "#000");
-  svg.append(bg, path);
+  const label = document.createElementNS(NS, "text");
+  label.setAttribute("x", String(side / 2));
+  label.setAttribute("y", String(side + foot - 1.6));
+  label.setAttribute("text-anchor", "middle");
+  label.setAttribute("font-family", "Helvetica, Arial, sans-serif");
+  label.setAttribute("font-weight", "700");
+  label.setAttribute("font-size", "3");
+  label.setAttribute("fill", "#000");
+  label.textContent = "seedgen.uk";
+  svg.append(bg, path, label);
   $("[data-qr-title]").textContent = `${name} address`;
   $("[data-qr-code]").replaceChildren(svg);
   $("[data-qr-address]").textContent = address;
