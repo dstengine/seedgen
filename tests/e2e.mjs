@@ -20,7 +20,7 @@ for (const scheme of ["light", "dark"]) {
   await page.goto(URL);
   await page.waitForFunction(() => document.querySelectorAll("[data-words] li").length === 24);
   const first = await page.textContent("[data-words]");
-  assert.equal((await page.$$("[data-addresses] li")).length, 5);
+  assert.equal((await page.$$("[data-addresses] li")).length, 6);
 
   // Longest BIP39 word in every cell must fit its cell.
   const overflow = await page.evaluate(() => {

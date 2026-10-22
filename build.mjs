@@ -43,15 +43,15 @@ await sharp({ create: { width: 512, height: 512, channels: 4, background: "#6B24
 const card = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
   <rect width="1200" height="630" fill="#120A1F"/>
   <text x="80" y="250" font-family="Helvetica, Arial, sans-serif" font-size="84" font-weight="800" fill="#F1ECF8">Seed phrase generator</text>
-  <text x="80" y="340" font-family="Helvetica, Arial, sans-serif" font-size="40" fill="#B98BFF">Solana · Ethereum · Bitcoin · Tron · TON</text>
-  <text x="80" y="420" font-family="Helvetica, Arial, sans-serif" font-size="32" fill="#A79BBB">One tap, 24 words, five addresses — offline in your browser</text>
+  <text x="80" y="340" font-family="Helvetica, Arial, sans-serif" font-size="40" fill="#B98BFF">Solana · Ethereum · Bitcoin · Tron · TON · Monero</text>
+  <text x="80" y="420" font-family="Helvetica, Arial, sans-serif" font-size="32" fill="#A79BBB">One tap, 24 words, six addresses — offline in your browser</text>
 </svg>`;
 await sharp(Buffer.from(card)).png().toFile(dist("share.png").pathname);
 
 writeFileSync(dist("manifest.webmanifest"), JSON.stringify({
   name: "Seedgen — seed phrase generator",
   short_name: "Seedgen",
-  description: "Seed phrase generator: a 12- or 24-word phrase and its Solana, Ethereum, Bitcoin, Tron and TON addresses, Trust Wallet's included, offline.",
+  description: "Seed phrase generator: a 12- or 24-word phrase and its Solana, Ethereum, Bitcoin, Tron, TON and Monero addresses, Trust Wallet's included, offline.",
   start_url: "./",
   scope: "./",
   display: "standalone",

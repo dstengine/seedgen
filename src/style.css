@@ -12,7 +12,7 @@
   --danger: #C4232F;
   --ok: #1E7F4F;
   --on-danger: #FFFFFF;
-  --sol: #9945FF; --eth: #627EEA; --btc: #F7931A; --trx: #EB0029; --ton: #0098EA;
+  --sol: #9945FF; --eth: #627EEA; --btc: #F7931A; --trx: #EB0029; --ton: #0098EA; --xmr: #FF6600;
   --radius: 14px;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   color-scheme: light dark;
@@ -152,9 +152,9 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 .addr:active { background: var(--tint); }
 .chip { grid-column: 1; grid-row: 1 / span 2; font: 700 .7rem/1 var(--mono); color: #fff; padding: 6px 0; width: 40px; text-align: center; border-radius: 6px; }
 .chip-sol { background: var(--sol); } .chip-eth { background: var(--eth); } .chip-btc { background: var(--btc); }
-.chip-trx { background: var(--trx); } .chip-ton { background: var(--ton); }
+.chip-trx { background: var(--trx); } .chip-ton { background: var(--ton); } .chip-xmr { background: var(--xmr); }
 /* White fails AA on the lighter brand colours; dark ink passes on all three. */
-.chip-eth, .chip-btc, .chip-ton { color: #120A1F; }
+.chip-eth, .chip-btc, .chip-ton, .chip-xmr { color: #120A1F; }
 .addr-name, .addr-value { grid-column: 2; }
 .addr-name { font-size: .8rem; color: var(--muted); }
 .addr-value { font-family: var(--mono); font-size: .8rem; overflow-wrap: anywhere; word-break: break-all; }

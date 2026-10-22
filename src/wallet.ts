@@ -24,7 +24,7 @@ import { hmac } from "@noble/hashes/hmac.js";
 import { bytesToHex, hexToBytes, utf8ToBytes } from "@noble/hashes/utils.js";
 import { base58, base58check, base64urlnopad, bech32 } from "@scure/base";
 
-export type Chain = "SOL" | "ETH" | "BTC" | "TRX" | "TON";
+export type Chain = "SOL" | "ETH" | "BTC" | "TRX" | "TON" | "XMR";
 
 export interface Wallet {
   id: string;
@@ -51,6 +51,7 @@ export const CHAINS: { id: Chain; name: string; path: string; note: string }[] =
   { id: "BTC", name: "Bitcoin", path: "m/84'/0'/0'/0/0", note: "Native SegWit (bc1…) · Trust Wallet" },
   { id: "TRX", name: "Tron", path: "m/44'/195'/0'/0/0", note: "TronLink, Trust Wallet" },
   { id: "TON", name: "TON (Gram)", path: "TON mnemonic", note: "W5 · Tonkeeper, MyTonWallet" },
+  { id: "XMR", name: "Monero", path: "m/44'/128'/0'/0/0", note: "Main address · BIP39 import, Ledger path" },
 ];
 
 export type WordCount = 12 | 24;
@@ -235,6 +236,52 @@ async function tonAddress(phrase: string, seed: Uint8Array): Promise<string> {
   return tonW5Address(ed25519.getPublicKey(tonSeed.subarray(0, 32)));
 }
 
+// Monero. The native 25-word seed uses its own wordlist, so a BIP39 phrase
+// cannot be one; instead the secp256k1 key at m/44'/128'/0'/0/0 (the path
+// Ledger and Ian Coleman's tool use) is reduced mod l to be the spend key,
+// as Monero does. The view key is keccak256(spend) reduced the same way,
+// and the address is 0x12 + both public keys + a 4-byte keccak checksum,
+// in Monero's block base58 (8 bytes -> 11 characters).
+const ED_L = ed25519.Point.Fn.ORDER;
+const scReduce32 = (b: Uint8Array): bigint => {
+  let n = 0n;
+  for (let i = b.length - 1; i >= 0; i--) n = (n << 8n) | BigInt(b[i]);
+  return n % ED_L;
+};
+const XMR_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+const XMR_BLOCK = [0, 2, 3, 5, 6, 7, 9, 10, 11];
+
+function moneroBase58(data: Uint8Array): string {
+  let out = "";
+  for (let i = 0; i < data.length; i += 8) {
+    const block = data.subarray(i, i + 8);
+    let n = 0n;
+    for (const b of block) n = (n << 8n) | BigInt(b);
+    let chunk = "";
+    for (let j = 0; j < XMR_BLOCK[block.length]; j++) {
+      chunk = XMR_ALPHABET[Number(n % 58n)] + chunk;
+      n /= 58n;
+    }
+    out += chunk;
+  }
+  return out;
+}
+
+export function moneroAddress(spendPriv: Uint8Array): string {
+  const spend = scReduce32(spendPriv);
+  const spendLE = new Uint8Array(32);
+  for (let i = 0, n = spend; i < 32; i++, n >>= 8n) spendLE[i] = Number(n & 0xffn);
+  const view = scReduce32(keccak_256(spendLE));
+  const body = new Uint8Array(65);
+  body[0] = 0x12;
+  body.set(ed25519.Point.BASE.multiply(spend).toBytes(), 1);
+  body.set(ed25519.Point.BASE.multiply(view).toBytes(), 33);
+  const full = new Uint8Array(69);
+  full.set(body);
+  full.set(keccak_256(body).subarray(0, 4), 65);
+  return moneroBase58(full);
+}
+
 export async function addressesOf(phrase: string): Promise<Record<Chain, string>> {
   const seed = await mnemonicToSeed(phrase);
   const root = HDKey.fromMasterSeed(seed);
@@ -245,6 +292,7 @@ export async function addressesOf(phrase: string): Promise<Record<Chain, string>
     BTC: btcSegwit(secpAt(root, "m/84'/0'/0'/0/0")),
     TRX: tronAddress(secpAt(root, "m/44'/195'/0'/0/0")),
     TON: await tonAddress(phrase, seed),
+    XMR: moneroAddress(secpAt(root, "m/44'/128'/0'/0/0")),
   };
 }
 

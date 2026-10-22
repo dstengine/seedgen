@@ -1,4 +1,4 @@
-import { CHAINS, TON_SCHEME, TRUST_PATHS, newWallet, trustAddressesOf, wordCount, type Chain, type Wallet, type WordCount } from "./wallet";
+import { CHAINS, TON_SCHEME, TRUST_PATHS, addressesOf, newWallet, trustAddressesOf, wordCount, type Chain, type Wallet, type WordCount } from "./wallet";
 
 const $ = <T extends Element = HTMLElement>(sel: string) => document.querySelector(sel) as T;
 
@@ -176,11 +176,13 @@ function render(w: Wallet) {
   words.replaceChildren(...w.phrase.split(" ").map((word) => el("li", "", word)));
 
   const list = $("[data-addresses]");
+  // Favourites saved before Monero was added carry no XMR address.
+  if (!w.addresses.XMR) addressesOf(w.phrase).then((a) => { w.addresses.XMR = a.XMR; if (current() === w) render(w); });
   list.replaceChildren(
     ...CHAINS.map((c) => {
       // TON opens in a different wallet depending on the phrase's length.
       const name = c.id === "TON" ? `${c.name} · ${TON_SCHEME[wordCount(w.phrase)].wallets.split(",")[0]}` : c.name;
-      return addrRow(c.id, name, w.addresses[c.id]);
+      return addrRow(c.id, name, w.addresses[c.id] ?? "…");
     }),
   );
   renderTrust(w);
@@ -206,7 +208,7 @@ async function renderTrust(w: Wallet) {
   const trust = w.trust ?? (w.trust = await trustAddressesOf(w.phrase));
   if (current() !== w) return;
   const differs = (["SOL", "TON"] as const).filter((id) => trust[id] !== w.addresses[id]);
-  const same = CHAINS.filter((c) => !differs.includes(c.id as "SOL" | "TON")).map((c) => c.name.replace(/ \(.*/, ""));
+  const same = CHAINS.filter((c) => c.id !== "XMR" && !differs.includes(c.id as "SOL" | "TON")).map((c) => c.name.replace(/ \(.*/, ""));
   const list = (names: string[]) => names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : names[0];
   $("[data-trust-text]").textContent =
     `${list(same)} are the same as above. Trust Wallet takes ${differs.length > 1 ? "Solana and TON from its own paths" : "Solana from its own path"}:`;

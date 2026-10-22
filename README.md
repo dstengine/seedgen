@@ -1,7 +1,7 @@
 # seedgen
 
 A seed phrase generator: one tap (or a swipe) makes a 12- or 24-word phrase and its
-Solana, Ethereum, Bitcoin, Tron and TON addresses. Favourites are kept in
+Solana, Ethereum, Bitcoin, Tron, TON and Monero addresses. Favourites are kept in
 `localStorage`, deleted with two taps. Ships as a PWA and as a Telegram
 Mini App. Spec: `~/mind/mobile/sites/seedgen.md`.
 
@@ -30,6 +30,7 @@ in ~256 is), so the same words import everywhere:
 | Ethereum | `m/44'/60'/0'/0/0` | MetaMask, Rabby |
 | Bitcoin | `m/84'/0'/0'/0/0`, native SegWit | any BIP84 wallet |
 | Tron | `m/44'/195'/0'/0/0` | TronLink, Trust Wallet |
+| Monero | `m/44'/128'/0'/0/0` (secp256k1 key reduced mod l = spend key; view key = keccak256(spend) reduced) | BIP39 import only; not a native 25-word seed. Trust Wallet has no Monero |
 | TON, 24 words | TON mnemonic → wallet W5 (v5r1), non-bounceable `UQ…` | Tonkeeper, MyTonWallet |
 | TON, 12 words | `m/44'/607'/0'` (SLIP-10 ed25519) → wallet v4R2 | Trust Wallet |
 

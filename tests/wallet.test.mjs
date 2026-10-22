@@ -31,7 +31,15 @@ assert.equal(a.ETH, "0x9858EfFD232B4033E47d90003D41EC34EcaEda94");
 assert.equal(a.BTC, "bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu");
 assert.equal(a.SOL, "HAgk14JpMQLgt6rVgv7cBQFJWFto5Dqxi472uT3DKpqk");
 assert.equal(a.TRX, "TUEZSdKsoDHQMeZwihtdoBiN46zxhGWYdH");
+assert.match(a.XMR, /^4[0-9A-Za-z]{94}$/);
 console.log("ok  known answers: SOL ETH BTC TRX");
+
+// Monero: a published spend key and its main-net address (monero-python's tests).
+assert.equal(
+  w.moneroAddress(Buffer.from("148d78d2aba7dbca5cd8f6abcfb0b3c009ffbdbea1ff373d50ed94d78286640e", "hex")),
+  "42ey1afDFnn4886T7196doS9GPMzexD9gXpsZJDwVjeRVdFCSoHnv7KPbBeGpzJBzHRCAs9UxqeoyFQMYbqSWYTfJJQAWDm",
+);
+console.log("ok  Monero address matches the published spend-key vector");
 
 for (let i = 0; i < 200; i++) {
   const key = randomBytes(32);
