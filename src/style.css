@@ -43,13 +43,15 @@ body {
 }
 button { font: inherit; color: inherit; cursor: pointer; }
 h1, h2 { line-height: 1.2; margin: 0 0 .35rem; }
-h1 { font-size: 1.6rem; letter-spacing: -.01em; }
+h1 { font-size: 1.25rem; letter-spacing: -.01em; margin: 0 0 10px; }
 h2 { font-size: 1.25rem; }
 .lede { color: var(--muted); margin: 0 0 1rem; }
 .visually-hidden, .offscreen { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .offscreen { left: -9999px; }
 
-main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+main { max-width: 640px; margin: 0 auto; padding: 0 16px; touch-action: pan-y; }
+/* What used to open the page now follows the card. */
+.below { margin-top: 22px; }
 
 /* ---- top bar */
 .bar {
@@ -111,17 +113,17 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 /* The copy that flies off after a swipe. */
 .wallet-ghost { position: fixed; z-index: 6; pointer-events: none; box-shadow: 0 18px 40px rgb(0 0 0 / .25); }
 /* Swipe hints: --swipe runs -1 (left, new) … 1 (right, back) with the drag. */
-.hint {
+.swipe-hint {
   position: absolute; top: 14px; z-index: 2; pointer-events: none;
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 12px; border-radius: 999px; font-weight: 700; font-size: .85rem; letter-spacing: .02em;
   background: var(--accent); color: var(--on-accent); box-shadow: 0 6px 18px rgb(0 0 0 / .2);
   opacity: 0; transform: scale(.8);
 }
-.hint-new { right: 14px; opacity: clamp(0, calc(var(--swipe, 0) * -1), 1); transform: rotate(8deg) scale(calc(.8 + clamp(0, calc(var(--swipe, 0) * -1), 1) * .2)); }
-.hint-back { left: 14px; opacity: clamp(0, var(--swipe, 0), 1); transform: rotate(-8deg) scale(calc(.8 + clamp(0, var(--swipe, 0), 1) * .2)); }
-.hint-star { left: 50%; top: 10px; transform: translateX(-50%) scale(.8); opacity: var(--lift, 0); transform: translateX(-50%) scale(calc(.8 + var(--lift, 0) * .3)); }
-.hint .ico { width: 1.1em; height: 1.1em; }
+.swipe-new { right: 14px; opacity: clamp(0, calc(var(--swipe, 0) * -1), 1); transform: rotate(8deg) scale(calc(.8 + clamp(0, calc(var(--swipe, 0) * -1), 1) * .2)); }
+.swipe-back { left: 14px; opacity: clamp(0, var(--swipe, 0), 1); transform: rotate(-8deg) scale(calc(.8 + clamp(0, var(--swipe, 0), 1) * .2)); }
+.swipe-star { left: 50%; top: 10px; transform: translateX(-50%) scale(.8); opacity: var(--lift, 0); transform: translateX(-50%) scale(calc(.8 + var(--lift, 0) * .3)); }
+.swipe-hint .ico { width: 1.1em; height: 1.1em; }
 /* Up from the phrase or the head is ours; the browser keeps the way down. */
 .words, .wallet-head { touch-action: pan-x pan-up; }
 .star-fly { position: fixed; z-index: 20; pointer-events: none; color: var(--accent); filter: drop-shadow(0 4px 10px rgb(0 0 0 / .25)); }
@@ -211,7 +213,7 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 .addr-value { font-family: var(--mono); font-size: .8rem; overflow-wrap: anywhere; word-break: break-all; }
 
 /* ---- Trust Wallet */
-.compat { margin: -.5rem 0 1rem; font-size: .9rem; color: var(--muted); }
+.compat { margin: 0 0 1rem; font-size: .9rem; color: var(--muted); }
 .badge {
   display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
   background: var(--tint); color: var(--accent); font-weight: 700; font-size: .8rem;
@@ -223,9 +225,9 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 .trust-title .ico { color: var(--accent); }
 .trust-text { font-size: .8rem; color: var(--muted); margin: 0 0 8px; }
 
-.hint { color: var(--muted); font-size: .85rem; text-align: center; margin: 10px 0 0; }
-.hint .ico { margin-right: 5px; }
-@media (hover: hover) and (pointer: fine) { .hint { display: none; } }
+.tip { color: var(--muted); font-size: .85rem; text-align: center; margin: 10px 0 0; }
+.tip .ico { margin-right: 5px; }
+@media (hover: hover) and (pointer: fine) { .tip { display: none; } }
 
 /* ---- favourites */
 .favs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
@@ -281,4 +283,4 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 .noscript { margin: 16px; padding: 12px; border: 1px solid var(--danger); border-radius: 10px; }
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { .hint { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .swipe-hint { transition: none; } }

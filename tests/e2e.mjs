@@ -78,7 +78,7 @@ for (const scheme of ["light", "dark"]) {
   const wx = wb.x + wb.width / 2, wy = wb.y + 30;
   await page.locator("[data-words]").dispatchEvent("pointerdown", { pointerType: "touch", clientX: wx, clientY: wy, isPrimary: true, bubbles: true });
   await page.locator("[data-words]").dispatchEvent("pointermove", { pointerType: "touch", clientX: wx + 3, clientY: wy - 40, bubbles: true });
-  assert.ok(await page.isVisible(".hint-star"), "the favourite hint did not show on the way up");
+  assert.ok(await page.isVisible(".swipe-star"), "the favourite hint did not show on the way up");
   await page.locator("[data-words]").dispatchEvent("pointermove", { pointerType: "touch", clientX: wx + 3, clientY: wy - 100, bubbles: true });
   await page.locator("[data-words]").dispatchEvent("pointerup", { pointerType: "touch", clientX: wx + 3, clientY: wy - 100, bubbles: true });
   assert.equal(await page.getAttribute("[data-star]", "aria-pressed"), "true", "swipe up did not star");

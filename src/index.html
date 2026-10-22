@@ -55,25 +55,11 @@
 <main>
   <section class="view" data-view-panel="gen">
     <h1>Seed phrase generator</h1>
-    <p class="lede">One tap — or a swipe — makes a fresh 12- or 24-word phrase and its Solana, Ethereum, Bitcoin, Tron, TON and Monero addresses.</p>
-    <p class="compat"><span class="badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg>Trust Wallet compatible</span> The card shows each address as Trust Wallet will, next to Phantom's and Tonkeeper's.</p>
-
-    <!-- Security notice. app.ts swaps the text with the connection: online
-         it says how to cut the network, offline it says that has worked. -->
-    <aside class="notice" data-net data-state="online" aria-live="polite">
-      <svg class="notice-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l8 3v6c0 4.9-3.4 9.1-8 10-4.6-.9-8-5.1-8-10v-6z"/><path class="tick" d="M8.5 12.2l2.4 2.4 4.6-4.8"/></svg>
-      <div>
-        <p class="notice-title" data-net-title>Works offline</p>
-        <p class="notice-text" data-net-text>Nothing you generate leaves this device. For extra safety, turn on airplane mode before you generate — the app keeps working without a connection.</p>
-        <p class="notice-text"><a href="https://github.com/dstengine/seedgen" rel="noopener" target="_blank" data-external class="with-ico"><svg class="ico" aria-hidden="true"><use href="#i-code"/></svg>Open source on GitHub</a> — read the code that makes your phrase.</p>
-      </div>
-    </aside>
-
     <article class="wallet" data-wallet aria-live="polite">
       <!-- Swipe hints: fade in with the drag, left for a new wallet, right for the last. -->
-      <span class="hint hint-new" aria-hidden="true"><svg class="ico"><use href="#i-dice"/></svg>New</span>
-      <span class="hint hint-back" aria-hidden="true"><svg class="ico"><use href="#i-swipe"/></svg>Back</span>
-      <span class="hint hint-star" aria-hidden="true"><svg class="ico"><use href="#i-star"/></svg>Favourite</span>
+      <span class="swipe-hint swipe-new" aria-hidden="true"><svg class="ico"><use href="#i-dice"/></svg>New</span>
+      <span class="swipe-hint swipe-back" aria-hidden="true"><svg class="ico"><use href="#i-swipe"/></svg>Back</span>
+      <span class="swipe-hint swipe-star" aria-hidden="true"><svg class="ico"><use href="#i-star"/></svg>Favourite</span>
       <div class="wallet-head">
         <span class="stamp" data-stamp>…</span>
         <div class="seg" role="group" aria-label="Phrase length">
@@ -95,7 +81,23 @@
       </section>
     </article>
 
-    <p class="hint"><svg class="ico" aria-hidden="true"><use href="#i-swipe"/></svg>Swipe the card left for a new one, right to go back.</p>
+    <p class="tip"><svg class="ico" aria-hidden="true"><use href="#i-swipe"/></svg>Swipe left for a new phrase, right for the last one; swipe the words up to keep it.</p>
+
+    <div class="below">
+    <p class="lede">One tap — or a swipe — makes a fresh 12- or 24-word phrase and its Solana, Ethereum, Bitcoin, Tron, TON and Monero addresses.</p>
+    <p class="compat"><span class="badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg>Trust Wallet compatible</span> The card shows each address as Trust Wallet will, next to Phantom's and Tonkeeper's.</p>
+
+    <!-- Security notice. app.ts swaps the text with the connection: online
+         it says how to cut the network, offline it says that has worked. -->
+    <aside class="notice" data-net data-state="online" aria-live="polite">
+      <svg class="notice-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l8 3v6c0 4.9-3.4 9.1-8 10-4.6-.9-8-5.1-8-10v-6z"/><path class="tick" d="M8.5 12.2l2.4 2.4 4.6-4.8"/></svg>
+      <div>
+        <p class="notice-title" data-net-title>Works offline</p>
+        <p class="notice-text" data-net-text>Nothing you generate leaves this device. For extra safety, turn on airplane mode before you generate — the app keeps working without a connection.</p>
+        <p class="notice-text"><a href="https://github.com/dstengine/seedgen" rel="noopener" target="_blank" data-external class="with-ico"><svg class="ico" aria-hidden="true"><use href="#i-code"/></svg>Open source on GitHub</a> — read the code that makes your phrase.</p>
+      </div>
+    </aside>
+    </div>
   </section>
 
   <section class="view" data-view-panel="fav" hidden>

@@ -336,7 +336,7 @@ function toggleFav() {
   renderFavs();
 }
 
-// Swipes on the card. Left for a new wallet, right for the last: the card
+// Swipes anywhere on the page. Left for a new wallet, right for the last: the card
 // follows the finger and tilts with it, a hint fades in as the drag nears
 // the threshold, and on release it either springs back or flies off the
 // way it was thrown while the next card rises from under it — a copy of
@@ -422,14 +422,16 @@ function swipe(card: HTMLElement) {
     );
   };
 
-  card.addEventListener("pointerdown", (e) => {
-    if (e.pointerType === "mouse" || (e.target as Element).closest("button")) return;
+  const zone = document.body;
+  zone.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse" || document.documentElement.dataset.view === "fav") return;
+    if ((e.target as Element).closest("button, a, dialog, .favs")) return;
     x0 = e.clientX; y0 = e.clientY; dx = 0; dy = 0; t0 = e.timeStamp; tracking = true; horizontal = null;
     liftable = !!(e.target as Element).closest(".words, .wallet-head");
     card.classList.add("dragging");
-    try { card.setPointerCapture(e.pointerId); } catch {}
+    try { zone.setPointerCapture(e.pointerId); } catch {}
   });
-  card.addEventListener("pointermove", (e) => {
+  zone.addEventListener("pointermove", (e) => {
     if (!tracking) return;
     dx = e.clientX - x0;
     dy = e.clientY - y0;
@@ -458,8 +460,8 @@ function swipe(card: HTMLElement) {
     if (dx < 0) generate();
     else back();
   };
-  card.addEventListener("pointerup", end);
-  card.addEventListener("pointercancel", end);
+  zone.addEventListener("pointerup", end);
+  zone.addEventListener("pointercancel", end);
 }
 
 // ---------------------------------------------------------------- favourites view
