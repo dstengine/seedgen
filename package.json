@@ -13,7 +13,8 @@
     "@noble/hashes": "2.4.0",
     "@scure/base": "2.4.0",
     "@scure/bip32": "2.4.0",
-    "@scure/bip39": "2.4.0"
+    "@scure/bip39": "2.4.0",
+    "qrcode-generator": "2.0.4"
   },
   "devDependencies": {
     "@ton/core": "0.63.1",

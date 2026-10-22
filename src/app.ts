@@ -1,3 +1,4 @@
+import qrcode from "qrcode-generator";
 import { CHAINS, TON_SCHEME, TRUST_PATHS, addressesOf, newWallet, trustAddressesOf, wordCount, type Chain, type Wallet, type WordCount } from "./wallet";
 
 const $ = <T extends Element = HTMLElement>(sel: string) => document.querySelector(sel) as T;
@@ -189,14 +190,51 @@ function render(w: Wallet) {
   syncStar();
 }
 
+/** The address as a QR code in the page's dialog. Always dark on light, in
+ *  both themes: scanners read that polarity. */
+function showQr(name: string, address: string) {
+  const qr = qrcode(0, "M");
+  qr.addData(address);
+  qr.make();
+  const n = qr.getModuleCount();
+  const quiet = 4;
+  let d = "";
+  for (let y = 0; y < n; y++)
+    for (let x = 0; x < n; x++) if (qr.isDark(y, x)) d += `M${x + quiet} ${y + quiet}h1v1h-1z`;
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${n + quiet * 2} ${n + quiet * 2}`);
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", `QR code of the ${name} address`);
+  svg.setAttribute("shape-rendering", "crispEdges");
+  const bg = document.createElementNS(NS, "rect");
+  bg.setAttribute("width", "100%");
+  bg.setAttribute("height", "100%");
+  bg.setAttribute("fill", "#fff");
+  const path = document.createElementNS(NS, "path");
+  path.setAttribute("d", d);
+  path.setAttribute("fill", "#000");
+  svg.append(bg, path);
+  $("[data-qr-title]").textContent = `${name} address`;
+  $("[data-qr-code]").replaceChildren(svg);
+  $("[data-qr-address]").textContent = address;
+  ($("[data-qr]") as HTMLDialogElement).showModal();
+}
+
 function addrRow(id: Chain, name: string, address: string) {
-  const li = el("li");
+  const li = el("li", "addr-item");
   const btn = el("button", "addr");
   btn.type = "button";
   btn.title = `Copy ${name} address`;
   btn.append(el("span", `chip chip-${id.toLowerCase()}`, id), el("span", "addr-name", name), el("code", "addr-value", address), icon("copy"));
   btn.addEventListener("click", () => copy(address, `${name} address`));
-  li.append(btn);
+  const qr = el("button", "qr-btn");
+  qr.type = "button";
+  qr.title = `Show ${name} address as a QR code`;
+  qr.append(icon("qr"), el("span", "visually-hidden", `QR code, ${name}`));
+  qr.disabled = address === "…";
+  qr.addEventListener("click", () => showQr(name, address));
+  li.append(btn, qr);
   return li;
 }
 
@@ -406,6 +444,10 @@ function start() {
     b.addEventListener("click", () => setWords(Number(b.dataset.wordsCount) as WordCount)),
   );
   document.querySelectorAll<HTMLElement>("[data-words-count]").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.wordsCount) === words)));
+
+  const qrDialog = $("[data-qr]") as HTMLDialogElement;
+  $("[data-qr-close]").addEventListener("click", () => qrDialog.close());
+  qrDialog.addEventListener("click", (e) => e.target === qrDialog && qrDialog.close());
 
   $("[data-generate]").addEventListener("click", generate);
   $("[data-star]").addEventListener("click", toggleFav);

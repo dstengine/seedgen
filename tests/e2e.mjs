@@ -22,6 +22,16 @@ for (const scheme of ["light", "dark"]) {
   const first = await page.textContent("[data-words]");
   assert.equal((await page.$$("[data-addresses] li")).length, 6);
 
+  // QR code of an address: opens, shows that address, closes.
+  {
+    const addr = await page.textContent("[data-addresses] li:nth-child(2) .addr-value");
+    await page.click("[data-addresses] li:nth-child(2) .qr-btn");
+    assert.ok(await page.isVisible("[data-qr] svg"));
+    assert.equal(await page.textContent("[data-qr-address]"), addr);
+    await page.click("[data-qr-close]");
+    assert.ok(!(await page.isVisible("[data-qr]")));
+  }
+
   // Longest BIP39 word in every cell must fit its cell.
   const overflow = await page.evaluate(() => {
     const lis = [...document.querySelectorAll("[data-words] li")];

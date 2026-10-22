@@ -2,7 +2,7 @@
 
 A seed phrase generator: one tap (or a swipe) makes a 12- or 24-word phrase and its
 Solana, Ethereum, Bitcoin, Tron, TON and Monero addresses. Favourites are kept in
-`localStorage`, deleted with two taps. Ships as a PWA and as a Telegram
+`localStorage`, deleted with two taps. Each address has a QR button (drawn in the page by `qrcode-generator`, no request). Ships as a PWA and as a Telegram
 Mini App. Spec: `~/mind/mobile/sites/seedgen.md`.
 
 Lives at https://seedgen.uk/ (Vercel project `seedgen`; DNS at GoDaddy,
