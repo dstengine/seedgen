@@ -173,12 +173,16 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 .qr-actions { display: flex; gap: 8px; width: min(100%, 560px); }
 .qr-actions button { flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--accent); background: none; color: var(--accent); border-radius: 10px; font-weight: 600; }
 .qr-actions button:active { background: var(--tint); }
-/* Print the code alone, on white. */
+/* Print the code alone, on white, from a sheet of its own: a <dialog> sits
+   in the top layer, which Safari prints as its grey backdrop. */
+.print-sheet { display: none; }
 @media print {
-  body > *:not(.qr) { display: none !important; }
-  .qr { position: static; display: flex; width: auto; height: auto; background: #fff; color: #000; }
-  .qr-close, .qr-actions { display: none; }
-  .qr-code { width: 12cm; }
+  body > *:not(.print-sheet) { display: none !important; }
+  .qr, .qr::backdrop { display: none !important; }
+  .print-sheet { display: block; background: #fff; color: #000; text-align: center; padding: 1cm; }
+  .print-sheet h2 { margin: 0 0 .5cm; font-size: 14pt; }
+  .print-sheet svg { display: block; width: 10cm; height: auto; margin: 0 auto; }
+  .print-sheet code { display: block; margin-top: .5cm; font-family: var(--mono); font-size: 9pt; overflow-wrap: anywhere; word-break: break-all; }
 }
 .addr-name, .addr-value { grid-column: 2; }
 .addr-name { font-size: .8rem; color: var(--muted); }

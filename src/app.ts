@@ -467,7 +467,15 @@ function start() {
   const qrDialog = $("[data-qr]") as HTMLDialogElement;
   $("[data-qr-close]").addEventListener("click", () => qrDialog.close());
   $("[data-qr-copy]").addEventListener("click", () => copy(qrNow.address, `${qrNow.name} address`));
-  $("[data-qr-print]").addEventListener("click", () => window.print());
+  $("[data-qr-print]").addEventListener("click", () => {
+    const sheet = $("[data-print]");
+    sheet.replaceChildren(
+      el("h2", "", `${qrNow.name} address`),
+      $("[data-qr-code] svg").cloneNode(true) as SVGElement,
+      el("code", "", qrNow.address),
+    );
+    window.print();
+  });
   qrDialog.addEventListener("click", (e) => e.target === qrDialog && qrDialog.close());
 
   $("[data-generate]").addEventListener("click", generate);
