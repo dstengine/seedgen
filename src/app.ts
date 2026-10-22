@@ -190,6 +190,8 @@ function render(w: Wallet) {
   syncStar();
 }
 
+let qrNow = { name: "", address: "" };
+
 /** The address as a QR code in the page's dialog. Always dark on light, in
  *  both themes: scanners read that polarity. */
 function showQr(name: string, address: string) {
@@ -204,8 +206,8 @@ function showQr(name: string, address: string) {
   const NS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(NS, "svg");
   const side = n + quiet * 2;
-  const foot = 5; // room under the code for the site's name
-  svg.setAttribute("viewBox", `0 0 ${side} ${side + foot}`);
+  const foot = 5; // room under the code for the site's name, close to it
+  svg.setAttribute("viewBox", `0 0 ${side} ${side - quiet + foot}`);
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", `QR code of the ${name} address`);
   svg.setAttribute("shape-rendering", "crispEdges");
@@ -218,7 +220,7 @@ function showQr(name: string, address: string) {
   path.setAttribute("fill", "#000");
   const label = document.createElementNS(NS, "text");
   label.setAttribute("x", String(side / 2));
-  label.setAttribute("y", String(side + foot - 1.6));
+  label.setAttribute("y", String(side - quiet + foot - 1.4));
   label.setAttribute("text-anchor", "middle");
   label.setAttribute("font-family", "Helvetica, Arial, sans-serif");
   label.setAttribute("font-weight", "700");
@@ -229,6 +231,7 @@ function showQr(name: string, address: string) {
   $("[data-qr-title]").textContent = `${name} address`;
   $("[data-qr-code]").replaceChildren(svg);
   $("[data-qr-address]").textContent = address;
+  qrNow = { name, address };
   ($("[data-qr]") as HTMLDialogElement).showModal();
 }
 
@@ -458,6 +461,8 @@ function start() {
 
   const qrDialog = $("[data-qr]") as HTMLDialogElement;
   $("[data-qr-close]").addEventListener("click", () => qrDialog.close());
+  $("[data-qr-copy]").addEventListener("click", () => copy(qrNow.address, `${qrNow.name} address`));
+  $("[data-qr-print]").addEventListener("click", () => window.print());
   qrDialog.addEventListener("click", (e) => e.target === qrDialog && qrDialog.close());
 
   $("[data-generate]").addEventListener("click", generate);

@@ -167,7 +167,19 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 .qr-code { width: min(100%, 60vh, 560px); }
 .qr-code svg { display: block; width: 100%; height: auto; border-radius: 8px; }
 .qr-address { display: block; max-width: 560px; font-family: var(--mono); font-size: .8rem; overflow-wrap: anywhere; word-break: break-all; user-select: text; }
-.qr-close { width: min(100%, 560px); min-height: 44px; border: 1px solid var(--accent); background: none; color: var(--accent); border-radius: 10px; font-weight: 600; }
+.qr-close { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border: 0; background: none; color: var(--ink); border-radius: 50%; display: grid; place-items: center; }
+.qr-close:active { background: var(--tint); }
+.qr-close .ico { width: 1.5em; height: 1.5em; }
+.qr-actions { display: flex; gap: 8px; width: min(100%, 560px); }
+.qr-actions button { flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--accent); background: none; color: var(--accent); border-radius: 10px; font-weight: 600; }
+.qr-actions button:active { background: var(--tint); }
+/* Print the code alone, on white. */
+@media print {
+  body > *:not(.qr) { display: none !important; }
+  .qr { position: static; display: flex; width: auto; height: auto; background: #fff; color: #000; }
+  .qr-close, .qr-actions { display: none; }
+  .qr-code { width: 12cm; }
+}
 .addr-name, .addr-value { grid-column: 2; }
 .addr-name { font-size: .8rem; color: var(--muted); }
 .addr-value { font-family: var(--mono); font-size: .8rem; overflow-wrap: anywhere; word-break: break-all; }
