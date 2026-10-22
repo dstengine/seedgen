@@ -336,31 +336,130 @@ function toggleFav() {
   renderFavs();
 }
 
-// Horizontal swipe on the card: left for a new wallet, right for the last.
+// Swipes on the card. Left for a new wallet, right for the last: the card
+// follows the finger and tilts with it, a hint fades in as the drag nears
+// the threshold, and on release it either springs back or flies off the
+// way it was thrown while the next card rises from under it — a copy of
+// the old card does the flying, so the real one can take the new wallet
+// at once. Up, from the phrase or the card's head, for the favourites:
+// the card lifts with the finger, and on release a star flies from it to
+// the Favourites tab. Up from the addresses stays a scroll (touch-action).
+const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const SWIPE_AT = 90; // px of drag that commits
+const LIFT_AT = 80; // px of upward drag that commits
+const FLICK = 0.5; // px/ms that commits a shorter drag
+
+/** A star that flies from the card to the Favourites tab, which then pulses. */
+function starFlight(card: HTMLElement) {
+  const tab = $("[data-view=\"fav\"]");
+  if (reducedMotion()) return;
+  const from = card.getBoundingClientRect();
+  const to = tab.getBoundingClientRect();
+  const star = el("span", "star-fly");
+  star.append(icon("star"));
+  star.setAttribute("aria-hidden", "true");
+  const x0 = from.left + from.width / 2, y0 = from.top + 60;
+  const x1 = to.left + to.width / 2, y1 = to.top + to.height / 2;
+  Object.assign(star.style, { left: `${x0}px`, top: `${y0}px` });
+  document.body.append(star);
+  star.animate(
+    [
+      { transform: "translate(-50%, -50%) scale(.6)", opacity: 0, offset: 0 },
+      { transform: "translate(-50%, -50%) scale(1.6)", opacity: 1, offset: 0.25 },
+      { transform: `translate(calc(-50% + ${(x1 - x0) * 0.6}px), calc(-50% + ${(y1 - y0) * 0.35}px)) scale(1.2)`, opacity: 1, offset: 0.65 },
+      { transform: `translate(calc(-50% + ${x1 - x0}px), calc(-50% + ${y1 - y0}px)) scale(.4)`, opacity: 0.2, offset: 1 },
+    ],
+    { duration: 620, easing: "cubic-bezier(.4, 0, .6, 1)" },
+  ).finished.finally(() => {
+    star.remove();
+    tab.animate([{ transform: "scale(1)" }, { transform: "scale(1.18)" }, { transform: "scale(1)" }], { duration: 320, easing: "ease-out" });
+  });
+}
+
 function swipe(card: HTMLElement) {
-  let x0 = 0, y0 = 0, dx = 0, tracking = false, horizontal: boolean | null = null;
+  let x0 = 0, y0 = 0, dx = 0, dy = 0, t0 = 0, tracking = false, horizontal: boolean | null = null, liftable = false;
+
+  const place = (x: number) => {
+    // Nothing to go back to: the card resists a drag to the right.
+    const resisted = x > 0 && at <= 0 ? x * 0.3 : x;
+    card.style.transform = `translateX(${resisted}px) rotate(${resisted / 22}deg)`;
+    card.style.setProperty("--swipe", String(Math.max(-1, Math.min(1, resisted / SWIPE_AT))));
+  };
+  const lift = (y: number) => {
+    // Downwards is the page's scroll; only the way up lifts the card.
+    const up = Math.min(0, y);
+    const p = Math.min(1, -up / LIFT_AT);
+    card.style.transform = `translateY(${up * 0.5}px) scale(${1 - p * 0.03})`;
+    card.style.setProperty("--lift", String(p));
+  };
+  const settle = () => {
+    card.style.setProperty("--swipe", "0");
+    card.style.setProperty("--lift", "0");
+    if (reducedMotion()) return void (card.style.transform = "");
+    const from = card.style.transform;
+    card.style.transform = "";
+    card.animate([{ transform: from }, { transform: "none" }], { duration: 420, easing: "cubic-bezier(.2, 1.4, .4, 1)" });
+  };
+  const flyOff = (dir: -1 | 1, from: string) => {
+    card.style.transform = "";
+    card.style.setProperty("--swipe", "0");
+    if (reducedMotion()) return;
+    const box = card.getBoundingClientRect();
+    const ghost = card.cloneNode(true) as HTMLElement;
+    ghost.removeAttribute("data-wallet");
+    ghost.setAttribute("aria-hidden", "true");
+    ghost.className = "wallet wallet-ghost";
+    Object.assign(ghost.style, { left: `${box.left}px`, top: `${box.top}px`, width: `${box.width}px`, height: `${box.height}px`, transform: from });
+    ghost.style.setProperty("--swipe", String(dir));
+    document.body.append(ghost);
+    const to = `translateX(${dir * (window.innerWidth + box.width)}px) rotate(${dir * 28}deg)`;
+    ghost.animate([{ transform: from, opacity: 1 }, { transform: to, opacity: 0.4 }], { duration: 380, easing: "cubic-bezier(.3, 0, .8, .5)" }).finished
+      .finally(() => ghost.remove());
+    // The real card rises from under the thrown one.
+    card.animate(
+      [{ transform: `translateX(${-dir * 28}px) scale(.94)`, opacity: 0.55 }, { transform: "none", opacity: 1 }],
+      { duration: 460, easing: "cubic-bezier(.2, 1.1, .3, 1)" },
+    );
+  };
+
   card.addEventListener("pointerdown", (e) => {
     if (e.pointerType === "mouse" || (e.target as Element).closest("button")) return;
-    x0 = e.clientX; y0 = e.clientY; dx = 0; tracking = true; horizontal = null;
+    x0 = e.clientX; y0 = e.clientY; dx = 0; dy = 0; t0 = e.timeStamp; tracking = true; horizontal = null;
+    liftable = !!(e.target as Element).closest(".words, .wallet-head");
+    card.classList.add("dragging");
+    try { card.setPointerCapture(e.pointerId); } catch {}
   });
   card.addEventListener("pointermove", (e) => {
     if (!tracking) return;
     dx = e.clientX - x0;
-    const dy = e.clientY - y0;
+    dy = e.clientY - y0;
     if (horizontal === null && Math.hypot(dx, dy) > 8) horizontal = Math.abs(dx) > Math.abs(dy);
-    if (horizontal) card.style.transform = `translateX(${dx * 0.6}px) rotate(${dx / 60}deg)`;
+    if (horizontal) place(dx);
+    else if (horizontal === false && liftable) lift(dy);
   });
-  const end = () => {
+  const end = (e: PointerEvent) => {
     if (!tracking) return;
     tracking = false;
-    card.style.transform = "";
-    if (!horizontal || Math.abs(dx) < 70) return;
+    card.classList.remove("dragging");
+    if (horizontal === false && liftable) {
+      const speed = -dy / Math.max(1, e.timeStamp - t0);
+      if (dy <= -LIFT_AT || (dy <= -30 && speed >= FLICK)) {
+        const w = current();
+        if (w && !isFav(w)) starFlight(card);
+        toggleFav();
+        haptic("ok");
+      }
+      return settle();
+    }
+    const speed = Math.abs(dx) / Math.max(1, e.timeStamp - t0);
+    const commits = horizontal && (Math.abs(dx) >= SWIPE_AT || (Math.abs(dx) >= 30 && speed >= FLICK));
+    if (!commits || (dx > 0 && at <= 0)) return settle();
+    flyOff(dx < 0 ? -1 : 1, card.style.transform);
     if (dx < 0) generate();
     else back();
   };
   card.addEventListener("pointerup", end);
   card.addEventListener("pointercancel", end);
-  card.addEventListener("pointerleave", end);
 }
 
 // ---------------------------------------------------------------- favourites view

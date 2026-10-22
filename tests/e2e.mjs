@@ -55,6 +55,40 @@ for (const scheme of ["light", "dark"]) {
   await page.locator("[data-wallet]").dispatchEvent("pointermove", { pointerType: "touch", clientX: 200, clientY: y + 5 });
   await page.locator("[data-wallet]").dispatchEvent("pointerup", { pointerType: "touch", clientX: 200, clientY: y + 5 });
   assert.equal(await page.textContent("[data-words]"), first, "swipe right did not go back");
+  // The thrown card's copy leaves the page once it has flown off.
+  await page.waitForFunction(() => !document.querySelector(".wallet-ghost"));
+
+  // A short but quick flick to the left makes a new wallet too.
+  await page.locator("[data-wallet]").dispatchEvent("pointerdown", { pointerType: "touch", clientX: 200, clientY: y, isPrimary: true });
+  await page.locator("[data-wallet]").dispatchEvent("pointermove", { pointerType: "touch", clientX: 150, clientY: y + 3 });
+  await page.locator("[data-wallet]").dispatchEvent("pointerup", { pointerType: "touch", clientX: 150, clientY: y + 3 });
+  await page.waitForFunction((f) => document.querySelector("[data-words]").textContent !== f, first);
+  await page.waitForFunction(() => !document.querySelector(".wallet-ghost"));
+  // A drag too short to commit springs back and changes nothing.
+  const third = await page.textContent("[data-words]");
+  await page.locator("[data-wallet]").dispatchEvent("pointerdown", { pointerType: "touch", clientX: 200, clientY: y, isPrimary: true });
+  await page.locator("[data-wallet]").dispatchEvent("pointermove", { pointerType: "touch", clientX: 180, clientY: y });
+  await page.waitForTimeout(400);
+  await page.locator("[data-wallet]").dispatchEvent("pointerup", { pointerType: "touch", clientX: 180, clientY: y });
+  await page.waitForTimeout(100);
+  assert.equal(await page.textContent("[data-words]"), third, "a short slow drag changed the wallet");
+
+  // Swipe up from the phrase stars it: a star flies to the Favourites tab.
+  const wb = await page.locator("[data-words]").boundingBox();
+  const wx = wb.x + wb.width / 2, wy = wb.y + 30;
+  await page.locator("[data-words]").dispatchEvent("pointerdown", { pointerType: "touch", clientX: wx, clientY: wy, isPrimary: true, bubbles: true });
+  await page.locator("[data-words]").dispatchEvent("pointermove", { pointerType: "touch", clientX: wx + 3, clientY: wy - 40, bubbles: true });
+  assert.ok(await page.isVisible(".hint-star"), "the favourite hint did not show on the way up");
+  await page.locator("[data-words]").dispatchEvent("pointermove", { pointerType: "touch", clientX: wx + 3, clientY: wy - 100, bubbles: true });
+  await page.locator("[data-words]").dispatchEvent("pointerup", { pointerType: "touch", clientX: wx + 3, clientY: wy - 100, bubbles: true });
+  assert.equal(await page.getAttribute("[data-star]", "aria-pressed"), "true", "swipe up did not star");
+  assert.ok(await page.$(".star-fly"), "no star flew");
+  await page.waitForFunction(() => !document.querySelector(".star-fly"));
+  // The same swipe again takes it out; the tap below puts it back.
+  await page.locator("[data-words]").dispatchEvent("pointerdown", { pointerType: "touch", clientX: wx, clientY: wy, isPrimary: true, bubbles: true });
+  await page.locator("[data-words]").dispatchEvent("pointermove", { pointerType: "touch", clientX: wx, clientY: wy - 100, bubbles: true });
+  await page.locator("[data-words]").dispatchEvent("pointerup", { pointerType: "touch", clientX: wx, clientY: wy - 100, bubbles: true });
+  assert.equal(await page.getAttribute("[data-star]", "aria-pressed"), "false", "second swipe up did not unstar");
 
   // Star it, then delete from favourites: one tap arms, the second deletes.
   await page.click("[data-star]");
