@@ -1,4 +1,4 @@
-// One phrase, five chains. Everything here runs in the reader's browser and
+// One phrase, the top coins by market cap. Everything here runs in the reader's browser and
 // nothing it computes leaves it: no request is made while generating, and
 // the page's CSP forbids one (see index.html).
 //
@@ -22,9 +22,9 @@ import { keccak_256 } from "@noble/hashes/sha3.js";
 import { ripemd160 } from "@noble/hashes/legacy.js";
 import { hmac } from "@noble/hashes/hmac.js";
 import { bytesToHex, hexToBytes, utf8ToBytes } from "@noble/hashes/utils.js";
-import { base58, base58check, base64urlnopad, bech32 } from "@scure/base";
+import { base58, base58check, base58xrp, base64urlnopad, bech32 } from "@scure/base";
 
-export type Chain = "SOL" | "ETH" | "BTC" | "TRX" | "TON" | "XMR";
+export type Chain = "SOL" | "ETH" | "BTC" | "BNB" | "XRP" | "TRX" | "ZEC" | "DOGE" | "TON" | "XMR";
 
 export interface Wallet {
   id: string;
@@ -39,17 +39,23 @@ export interface Wallet {
 /** Trust Wallet reads every phrase as BIP39 and uses its own defaults for
  *  two chains: Solana at m/44'/501'/0' (Phantom adds a /0'), and TON at
  *  m/44'/607'/0' as wallet v4R2 — for 24 words too, where Tonkeeper reads
- *  the TON mnemonic instead. Ethereum, Bitcoin and Tron match as they are.
+ *  the TON mnemonic instead. The secp256k1 chains match as they are.
  *  Paths from wallet-core's registry.json. */
 export type TrustAddresses = { SOL: string; TON: string };
 export const TRUST_PATHS = { SOL: "m/44'/501'/0'", TON: "m/44'/607'/0'" } as const;
 
-/** Order on screen. Solana first: the site this opens under is about it. */
+/** Order on screen. Solana first, then roughly by market cap. BNB Smart
+ *  Chain is an EVM chain, so its address is Ethereum's; it gets a row of its
+ *  own because that is where people look for it. */
 export const CHAINS: { id: Chain; name: string; path: string; note: string }[] = [
   { id: "SOL", name: "Solana", path: "m/44'/501'/0'/0'", note: "Phantom, Solflare, Backpack" },
-  { id: "ETH", name: "Ethereum", path: "m/44'/60'/0'/0/0", note: "MetaMask, Trust Wallet, Rabby; any EVM chain" },
+  { id: "ETH", name: "Ethereum", path: "m/44'/60'/0'/0/0", note: "MetaMask, Trust Wallet, Rabby; any EVM chain, Hyperliquid too" },
   { id: "BTC", name: "Bitcoin", path: "m/84'/0'/0'/0/0", note: "Native SegWit (bc1…) · Trust Wallet" },
+  { id: "BNB", name: "BNB Smart Chain", path: "m/44'/60'/0'/0/0", note: "Same 0x address as Ethereum · Trust Wallet, MetaMask" },
+  { id: "XRP", name: "XRP", path: "m/44'/144'/0'/0/0", note: "Xaman, Trust Wallet" },
   { id: "TRX", name: "Tron", path: "m/44'/195'/0'/0/0", note: "TronLink, Trust Wallet" },
+  { id: "ZEC", name: "Zcash", path: "m/44'/133'/0'/0/0", note: "Transparent (t1…) · Trust Wallet" },
+  { id: "DOGE", name: "Dogecoin", path: "m/44'/3'/0'/0/0", note: "Legacy (D…) · Trust Wallet, Exodus" },
   { id: "TON", name: "TON (Gram)", path: "TON mnemonic", note: "W5 · Tonkeeper, MyTonWallet" },
   { id: "XMR", name: "Monero", path: "m/44'/128'/0'/0/0", note: "Main address · BIP39 import, Ledger path" },
 ];
@@ -123,6 +129,20 @@ function tronAddress(priv: Uint8Array): string {
   body[0] = 0x41;
   body.set(evmAddressBytes(priv), 1);
   return base58check(sha256).encode(body);
+}
+
+/** Legacy pay-to-public-key-hash: version bytes + hash160, base58check. */
+function p2pkh(priv: Uint8Array, version: number[], encode = base58check(sha256).encode): string {
+  const hash = ripemd160(sha256(secp256k1.getPublicKey(priv, true)));
+  return encode(new Uint8Array([...version, ...hash]));
+}
+
+// XRP is the same shape in Ripple's own base58 alphabet.
+function xrpAddress(priv: Uint8Array): string {
+  return p2pkh(priv, [0], (body) => {
+    const sum = sha256(sha256(body)).subarray(0, 4);
+    return base58xrp.encode(new Uint8Array([...body, ...sum]));
+  });
 }
 
 function btcSegwit(priv: Uint8Array): string {
@@ -286,11 +306,16 @@ export async function addressesOf(phrase: string): Promise<Record<Chain, string>
   const seed = await mnemonicToSeed(phrase);
   const root = HDKey.fromMasterSeed(seed);
   const sol = base58.encode(ed25519.getPublicKey(slip10Ed25519(seed, "m/44'/501'/0'/0'")));
+  const eth = eip55(evmAddressBytes(secpAt(root, "m/44'/60'/0'/0/0")));
   return {
     SOL: sol,
-    ETH: eip55(evmAddressBytes(secpAt(root, "m/44'/60'/0'/0/0"))),
+    ETH: eth,
     BTC: btcSegwit(secpAt(root, "m/84'/0'/0'/0/0")),
+    BNB: eth,
+    XRP: xrpAddress(secpAt(root, "m/44'/144'/0'/0/0")),
     TRX: tronAddress(secpAt(root, "m/44'/195'/0'/0/0")),
+    ZEC: p2pkh(secpAt(root, "m/44'/133'/0'/0/0"), [0x1c, 0xb8]),
+    DOGE: p2pkh(secpAt(root, "m/44'/3'/0'/0/0"), [0x1e]),
     TON: await tonAddress(phrase, seed),
     XMR: moneroAddress(secpAt(root, "m/44'/128'/0'/0/0")),
   };

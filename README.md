@@ -1,7 +1,12 @@
 # seedgen
 
 A seed phrase generator: one tap (or a swipe) makes a 12- or 24-word phrase and its
-Solana, Ethereum, Bitcoin, Tron, TON and Monero addresses. Favourites are kept in
+addresses for the largest coins: Solana, Ethereum, Bitcoin, BNB Smart Chain, XRP,
+Tron, Zcash, Dogecoin, TON and Monero — the CoinGecko top 10 of 24 Oct 2026, with
+USDT/USDC (no chain of their own, a note on the card), Hyperliquid (an EVM address,
+named in the Ethereum row) and the tokenised-loan "Figure Heloc" set aside, plus TON.
+"Copy all addresses" puts every row on the clipboard, one `Name: address` per line,
+Trust Wallet's own ones last. Favourites are kept in
 `localStorage`, deleted with two taps. Each address has a QR button (drawn in the page by `qrcode-generator`, no request).
 Swipes on the card: left for a new wallet, right for the last one — the card follows the finger, then flies off while the next rises; up from the phrase or the card's head stars it, and a star flies to the Favourites tab. Up from the addresses stays a scroll (`touch-action: pan-x pan-up` on the phrase and the head; the browser keeps the way down). A short, fast flick commits like a long drag. Ships as a PWA and as a Telegram
 Mini App. Spec: `~/mind/mobile/sites/seedgen.md`.
@@ -30,7 +35,11 @@ in ~256 is), so the same words import everywhere:
 | Solana | `m/44'/501'/0'/0'` (SLIP-10 ed25519) | Phantom, Solflare, Backpack |
 | Ethereum | `m/44'/60'/0'/0/0` | MetaMask, Rabby |
 | Bitcoin | `m/84'/0'/0'/0/0`, native SegWit | any BIP84 wallet |
+| BNB Smart Chain | `m/44'/60'/0'/0/0`, the Ethereum address | Trust Wallet, MetaMask |
+| XRP | `m/44'/144'/0'/0/0`, base58 in Ripple's alphabet | Xaman, Trust Wallet |
 | Tron | `m/44'/195'/0'/0/0` | TronLink, Trust Wallet |
+| Zcash | `m/44'/133'/0'/0/0`, transparent `t1…` (shielded needs a Zcash wallet's own keys) | Trust Wallet |
+| Dogecoin | `m/44'/3'/0'/0/0`, P2PKH `D…` | Trust Wallet, Exodus |
 | Monero | `m/44'/128'/0'/0/0` (secp256k1 key reduced mod l = spend key; view key = keccak256(spend) reduced) | BIP39 import only; not a native 25-word seed. Trust Wallet has no Monero |
 | TON, 24 words | TON mnemonic → wallet W5 (v5r1), non-bounceable `UQ…` | Tonkeeper, MyTonWallet |
 | TON, 12 words | `m/44'/607'/0'` (SLIP-10 ed25519) → wallet v4R2 | Trust Wallet |
@@ -45,7 +54,7 @@ address from Tonkeeper's; the card names the wallet on the TON row.
 
 Trust Wallet takes any phrase from here and reads it as BIP39, with its own
 defaults (wallet-core `registry.json`): Ethereum, Bitcoin (BIP84) and Tron
-match the card; Solana is `m/44'/501'/0'` (Phantom's has one more `/0'`) and
+(and BNB, XRP, Zcash, Dogecoin) match the card; Solana is `m/44'/501'/0'` (Phantom's has one more `/0'`) and
 TON is `m/44'/607'/0'` v4R2 for any length. The card shows those two under
 "In Trust Wallet" wherever they differ from the rows above, and the tests
 hold both to wallet-core's mnemonic vectors. Favourites saved before this

@@ -32,7 +32,20 @@ assert.equal(a.BTC, "bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu");
 assert.equal(a.SOL, "HAgk14JpMQLgt6rVgv7cBQFJWFto5Dqxi472uT3DKpqk");
 assert.equal(a.TRX, "TUEZSdKsoDHQMeZwihtdoBiN46zxhGWYdH");
 assert.match(a.XMR, /^4[0-9A-Za-z]{94}$/);
-console.log("ok  known answers: SOL ETH BTC TRX");
+// BIP44 legacy addresses, held to Ian Coleman's tool and to xrpl.js
+// (Wallet.fromMnemonic) / bitcoinjs-lib for the same phrases.
+assert.equal(a.XRP, "rHsMGQEkVNJmpGWs8XUBoTBiAAbwxZN5v3");
+assert.equal(a.DOGE, "DBus3bamQjgJULBJtYXpEzDWQRwF5iwxgC");
+assert.equal(a.ZEC, "t1XVXWCvpMgBvUaed4XDqWtgQgJSu1Ghz7F");
+assert.equal(a.BNB, a.ETH);
+{
+  const b = await w.addressesOf("shoot island position soft burden budget tooth cruel issue economy destroy above");
+  assert.equal(b.XRP, "rPwE3gChNKtZ1mhH3Ko8YFGqKmGRWLWXV3");
+  assert.equal(b.DOGE, "DJRFZNg8jkUtjcpo2zJd92FUAzwRjitw6f");
+  assert.equal(b.ZEC, "t1YYnByMzdGhQv3W3rnjHMrJs6HH4Y231gy");
+}
+assert.deepEqual(Object.keys(a).sort(), w.CHAINS.map((c) => c.id).sort());
+console.log("ok  known answers: SOL ETH BTC TRX XRP DOGE ZEC, BNB = ETH");
 
 // Monero: a published spend key and its main-net address (monero-python's tests).
 assert.equal(

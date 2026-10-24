@@ -13,6 +13,7 @@
   --ok: #1E7F4F;
   --on-danger: #FFFFFF;
   --sol: #9945FF; --eth: #627EEA; --btc: #F7931A; --trx: #EB0029; --ton: #0098EA; --xmr: #FF6600;
+  --bnb: #F0B90B; --xrp: #23292F; --zec: #F4B728; --doge: #C2A633;
   --radius: 14px;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   color-scheme: light dark;
@@ -166,6 +167,9 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; touch-action: pan-y; }
   border-radius: 10px; font-weight: 600;
 }
 
+.copy-all { margin: 14px 0 0; }
+.stable-note { font-size: .8rem; color: var(--muted); margin: 8px 0 0; }
+
 .addresses { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .addr {
   width: 100%; text-align: left; border: 1px solid var(--line); background: none;
@@ -177,8 +181,11 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; touch-action: pan-y; }
 .chip { grid-column: 1; grid-row: 1 / span 2; font: 700 .7rem/1 var(--mono); color: #fff; padding: 6px 0; width: 40px; text-align: center; border-radius: 6px; }
 .chip-sol { background: var(--sol); } .chip-eth { background: var(--eth); } .chip-btc { background: var(--btc); }
 .chip-trx { background: var(--trx); } .chip-ton { background: var(--ton); } .chip-xmr { background: var(--xmr); }
-/* White fails AA on the lighter brand colours; dark ink passes on all three. */
-.chip-eth, .chip-btc, .chip-ton, .chip-xmr { color: #120A1F; }
+.chip-bnb { background: var(--bnb); } .chip-xrp { background: var(--xrp); } .chip-zec { background: var(--zec); } .chip-doge { background: var(--doge); }
+/* White fails AA on the lighter brand colours; dark ink passes on all of them. */
+.chip-eth, .chip-btc, .chip-ton, .chip-xmr, .chip-bnb, .chip-zec, .chip-doge { color: #120A1F; }
+/* XRP's near-black would vanish into the dark card: an outline keeps the chip a chip. */
+.chip-xrp { box-shadow: inset 0 0 0 1px rgb(255 255 255 / .18); }
 .addr-item { display: flex; gap: 6px; }
 .addr-item .addr { flex: 1; min-width: 0; }
 .qr-btn { flex: none; width: 44px; border: 1px solid var(--line); background: none; color: var(--accent); border-radius: 10px; display: grid; place-items: center; }

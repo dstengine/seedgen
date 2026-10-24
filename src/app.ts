@@ -177,17 +177,30 @@ function render(w: Wallet) {
   words.replaceChildren(...w.phrase.split(" ").map((word) => el("li", "", word)));
 
   const list = $("[data-addresses]");
-  // Favourites saved before Monero was added carry no XMR address.
-  if (!w.addresses.XMR) addressesOf(w.phrase).then((a) => { w.addresses.XMR = a.XMR; if (current() === w) render(w); });
-  list.replaceChildren(
-    ...CHAINS.map((c) => {
-      // TON opens in a different wallet depending on the phrase's length.
-      const name = c.id === "TON" ? `${c.name} · ${TON_SCHEME[wordCount(w.phrase)].wallets.split(",")[0]}` : c.name;
-      return addrRow(c.id, name, w.addresses[c.id] ?? "…");
-    }),
-  );
+  // Favourites saved before a chain was added carry no address for it.
+  if (CHAINS.some((c) => !w.addresses[c.id])) addressesOf(w.phrase).then((a) => { w.addresses = { ...a, ...w.addresses }; if (current() === w) render(w); });
+  list.replaceChildren(...CHAINS.map((c) => addrRow(c.id, chainName(c.id, w), w.addresses[c.id] ?? "…")));
   renderTrust(w);
   syncStar();
+}
+
+/** The row's name. TON opens in a different wallet depending on the phrase's length. */
+function chainName(id: Chain, w: Wallet): string {
+  const c = CHAINS.find((c) => c.id === id)!;
+  return id === "TON" ? `${c.name} · ${TON_SCHEME[wordCount(w.phrase)].wallets.split(",")[0]}` : c.name;
+}
+
+/** Every address on the card, one "Name: address" per line, Trust Wallet's
+ *  own ones last — what a reader pastes into notes or a spreadsheet. */
+async function copyAll() {
+  const w = current();
+  if (!w) return;
+  const full = CHAINS.every((c) => w.addresses[c.id]) ? w.addresses : (w.addresses = { ...(await addressesOf(w.phrase)), ...w.addresses });
+  const trust = w.trust ?? (w.trust = await trustAddressesOf(w.phrase));
+  const lines = CHAINS.map((c) => `${chainName(c.id, w)}: ${full[c.id]}`);
+  for (const id of ["SOL", "TON"] as const)
+    if (trust[id] !== full[id]) lines.push(`${CHAINS.find((c) => c.id === id)!.name.replace(/ \(.*/, "")} · Trust Wallet: ${trust[id]}`);
+  copy(lines.join("\n") + "\n", "All addresses");
 }
 
 let qrNow = { name: "", address: "" };
@@ -582,6 +595,7 @@ function start() {
   $("[data-generate]").addEventListener("click", generate);
   $("[data-star]").addEventListener("click", toggleFav);
   $("[data-copy-phrase]").addEventListener("click", () => current() && copy(current().phrase, "Phrase"));
+  $("[data-copy-all]").addEventListener("click", copyAll);
   document.querySelectorAll<HTMLElement>(".tab").forEach((t) => t.addEventListener("click", () => show(t.dataset.view as "gen" | "fav")));
   swipe($("[data-wallet]"));
 

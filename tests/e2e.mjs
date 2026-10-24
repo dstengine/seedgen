@@ -20,7 +20,18 @@ for (const scheme of ["light", "dark"]) {
   await page.goto(URL);
   await page.waitForFunction(() => document.querySelectorAll("[data-words] li").length === 24);
   const first = await page.textContent("[data-words]");
-  assert.equal((await page.$$("[data-addresses] li")).length, 6);
+  assert.equal((await page.$$("[data-addresses] li")).length, 10);
+
+  // Copy all: one "Name: address" line per row, Trust Wallet's last.
+  {
+    await page.click("[data-copy-all]");
+    const text = await page.evaluate(() => navigator.clipboard.readText());
+    const lines = text.trim().split("\n");
+    const values = await page.$$eval("[data-addresses] .addr-value, [data-trust-list] .addr-value", (els) => els.map((e) => e.textContent));
+    assert.equal(lines.length, values.length);
+    lines.forEach((l, i) => assert.ok(l.endsWith(`: ${values[i]}`), l));
+    assert.match(lines[0], /^Solana: /);
+  }
 
   // QR code of an address: opens, shows that address, closes.
   {
@@ -128,7 +139,7 @@ for (const scheme of ["light", "dark"]) {
   await page.waitForFunction(() => document.querySelectorAll("[data-words] li").length === 24);
   assert.match(await page.textContent("[data-addresses]"), /TON \(Gram\) · Tonkeeper/);
   await page.waitForFunction(() => document.querySelectorAll("[data-trust-list] li").length === 2);
-  assert.match(await page.textContent("[data-trust-text]"), /Ethereum, Bitcoin and Tron are the same/);
+  assert.match(await page.textContent("[data-trust-text]"), /Ethereum, Bitcoin, BNB Smart Chain, XRP, Tron, Zcash and Dogecoin are the same/);
 
   // Offline after the first visit.
   await page.evaluate(() => navigator.serviceWorker.ready);
