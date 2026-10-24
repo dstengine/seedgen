@@ -31,6 +31,8 @@ for (const scheme of ["light", "dark"]) {
     assert.equal(lines.length, values.length);
     lines.forEach((l, i) => assert.ok(l.endsWith(`: ${values[i]}`), l));
     assert.match(lines[0], /^Solana: /);
+    // Exchange is a link out that carries nothing of the card.
+    assert.equal(await page.getAttribute("[data-wallet] a.exchange", "href"), "https://changenow.io/");
   }
 
   // QR code of an address: opens, shows that address, closes.
