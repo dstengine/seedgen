@@ -6,8 +6,11 @@ Tron, Zcash, Dogecoin, TON and Monero — the CoinGecko top 10 of 24 Oct 2026, w
 USDT/USDC (no chain of their own, a note on the card), Hyperliquid (an EVM address,
 named in the Ethereum row) and the tokenised-loan "Figure Heloc" set aside, plus TON.
 "Copy all addresses" puts every row on the clipboard, one `Name: address` per line,
-Trust Wallet's own ones last. "Exchange" beside it opens changenow.io in a new
-tab — a plain link, nothing from the card goes with it. Favourites are kept in
+Trust Wallet's own ones last. Each address row has an Exchange
+button: it opens changenow.io with that coin as "You get" (`/exchange?from=btc&to=…`,
+from ETH for Bitcoin) and copies the address to paste as the recipient. ChangeNOW's
+page takes no recipient in the URL (an unknown parameter resets the form), so nothing
+from the card goes with the link. Favourites are kept in
 `localStorage`, deleted with two taps. Each address has a QR button (drawn in the page by `qrcode-generator`, no request).
 Swipes on the card: left for a new wallet, right for the last one — the card follows the finger, then flies off while the next rises; up from the phrase or the card's head stars it, and a star flies to the Favourites tab. Up from the addresses stays a scroll (`touch-action: pan-x pan-up` on the phrase and the head; the browser keeps the way down). A short, fast flick commits like a long drag. Ships as a PWA and as a Telegram
 Mini App. Spec: `~/mind/mobile/sites/seedgen.md`.

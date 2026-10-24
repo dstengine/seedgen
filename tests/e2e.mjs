@@ -31,8 +31,19 @@ for (const scheme of ["light", "dark"]) {
     assert.equal(lines.length, values.length);
     lines.forEach((l, i) => assert.ok(l.endsWith(`: ${values[i]}`), l));
     assert.match(lines[0], /^Solana: /);
-    // Exchange is a link out that carries nothing of the card.
-    assert.equal(await page.getAttribute("[data-wallet] a.exchange", "href"), "https://changenow.io/");
+    // Exchange on every row: a link out that names the coin and carries nothing of the card.
+    const ex = await page.$$eval("[data-addresses] .ex-btn", (as) => as.map((a) => a.getAttribute("href")));
+    assert.equal(ex.length, 10);
+    assert.equal(ex[0], "https://changenow.io/exchange?from=btc&to=sol");
+    assert.equal(ex[2], "https://changenow.io/exchange?from=eth&to=btc");
+    // A click copies the row's address and opens ChangeNOW (stubbed here) in a new tab.
+    await ctx.route("https://changenow.io/**", (r) => r.fulfill({ body: "stub" }));
+    const xrp = page.locator("[data-addresses] .addr-item", { has: page.locator(".chip-xrp") });
+    const [popup] = await Promise.all([ctx.waitForEvent("page"), xrp.locator(".ex-btn").click()]);
+    assert.equal(popup.url(), "https://changenow.io/exchange?from=btc&to=xrp");
+    await popup.close();
+    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), await xrp.locator(".addr-value").textContent());
+    assert.match(await page.textContent("[data-toast]"), /XRP address copied — paste it on ChangeNOW/);
   }
 
   // QR code of an address: opens, shows that address, closes.

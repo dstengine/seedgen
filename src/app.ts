@@ -121,7 +121,7 @@ function toast(text: string) {
   toastTimer = window.setTimeout(() => (el.hidden = true), 1800);
 }
 
-async function copy(text: string, what: string) {
+async function copy(text: string, what: string, then = "") {
   try {
     await navigator.clipboard.writeText(text);
   } catch {
@@ -135,7 +135,7 @@ async function copy(text: string, what: string) {
     ta.remove();
   }
   haptic("ok");
-  toast(`${what} copied`);
+  toast(`${what} copied${then}`);
 }
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-6)}`;
@@ -253,6 +253,14 @@ function showQr(name: string, address: string) {
   if (fit < 1) line.style.fontSize = `${Math.max(0.3, 0.8 * fit)}rem`;
 }
 
+// ChangeNOW's tickers. Its page takes the pair from the URL but no
+// recipient (an unknown parameter resets the form), so Exchange copies the
+// address for the reader to paste there; nothing is sent with the link.
+const CHANGENOW: Record<Chain, string> = {
+  SOL: "sol", ETH: "eth", BTC: "btc", BNB: "bnbbsc", XRP: "xrp", TRX: "trx", ZEC: "zec", DOGE: "doge", TON: "ton", XMR: "xmr",
+};
+const exchangeUrl = (id: Chain) => `https://changenow.io/exchange?from=${id === "BTC" ? "eth" : "btc"}&to=${CHANGENOW[id]}`;
+
 function addrRow(id: Chain, name: string, address: string) {
   const li = el("li", "addr-item");
   const btn = el("button", "addr");
@@ -266,7 +274,24 @@ function addrRow(id: Chain, name: string, address: string) {
   qr.append(icon("qr"), el("span", "visually-hidden", `QR code, ${name}`));
   qr.disabled = address === "…";
   qr.addEventListener("click", () => showQr(name, address));
-  li.append(btn, qr);
+  const ex = el("a", "qr-btn ex-btn");
+  ex.href = exchangeUrl(id);
+  ex.target = "_blank";
+  ex.rel = "noopener noreferrer";
+  ex.title = `Exchange to ${name} on ChangeNOW; the address is copied to paste as the recipient`;
+  ex.append(icon("swap"), el("span", "visually-hidden", `Exchange to ${name} on ChangeNOW`));
+  ex.addEventListener("click", (e) => {
+    if (address === "…") return void e.preventDefault();
+    copy(address, `${name} address`, " — paste it on ChangeNOW as the recipient");
+    // Inside Telegram an outside link opens in its browser, not over the app.
+    if (tg?.openLink) {
+      e.preventDefault();
+      tg.openLink(ex.href);
+    }
+  });
+  const tools = el("div", "addr-tools");
+  tools.append(qr, ex);
+  li.append(btn, tools);
   return li;
 }
 

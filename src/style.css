@@ -167,11 +167,7 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; touch-action: pan-y; }
   border-radius: 10px; font-weight: 600;
 }
 
-/* Side by side where both labels fit on one line, stacked on a narrow phone. */
-.card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-.card-actions .copy-phrase { margin: 0; width: auto; flex: 3 1 190px; white-space: nowrap; }
-.card-actions .exchange { flex: 1 1 110px; text-decoration: none; }
-.card-actions .copy-phrase:active { background: var(--tint); }
+.copy-all { margin: 14px 0 0; }
 .stable-note { font-size: .8rem; color: var(--muted); margin: 8px 0 0; }
 
 .addresses { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
@@ -195,6 +191,15 @@ main { max-width: 640px; margin: 0 auto; padding: 0 16px; touch-action: pan-y; }
 .qr-btn { flex: none; width: 44px; border: 1px solid var(--line); background: none; color: var(--accent); border-radius: 10px; display: grid; place-items: center; }
 .qr-btn:active { background: var(--tint); }
 .qr-btn:disabled { opacity: .4; }
+.ex-btn { text-decoration: none; }
+/* QR and Exchange side by side; on a narrow phone one above the other, so
+   the address keeps its width. */
+.addr-tools { flex: none; display: flex; gap: 6px; }
+.addr-tools .qr-btn { min-height: 44px; }
+@media (max-width: 419px) {
+  .addr-tools { flex-direction: column; }
+  .addr-tools .qr-btn { flex: 1; }
+}
 .qr { border: 0; border-radius: 0; background: var(--surface); color: var(--ink); padding: 16px; width: 100vw; height: 100vh; height: 100dvh; max-width: none; max-height: none; margin: 0; text-align: center; }
 .qr[open] { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
 .qr::backdrop { background: rgb(0 0 0 / .55); }
